@@ -1,0 +1,1321 @@
+<title>점곡 보건소</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Nanum+Gothic:wght@400;700;800&display=swap">
+<style>
+/* 배치: 보건소 간판 띠 아래에 근무 단계 막대, 그 아래 한 화면에 한 가지 일. 진료 기록지는 종이 서식처럼 줄 칸으로 만든다.
+   감염병마다 고유한 색 하나를 정해 안내판, 상황판 핀, 선생님 화면에 똑같이 쓴다.
+   교실 태블릿과 TV에서 똑같이 보이도록 밝은 화면 하나로 고정했다. */
+:root {
+  color-scheme: light;
+  --paper: #eef4f1;
+  --card: #ffffff;
+  --ink: #17312b;
+  --ink-2: #4c645d;
+  --line: #cbdad4;
+  --clinic: #1f6f5c;
+  --clinic-2: #dcefe7;
+  --sign: #123f35;
+  --alert: #cf4b25; --alert-bg: #fde8df;
+  --cue: #f4b400; --cue-bg: #fff4cf;
+  --ok: #24724a; --ok-bg: #dcf1e3;
+  --d-flu: #2f66c0; --d-pox: #d0542a; --d-food: #6f7d10; --d-eye: #bf3478; --d-mumps: #7650bd; --d-covid: #a87200;
+  --dc: var(--clinic);
+  --font-display: "Jua", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --font-body: "Nanum Gothic", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+}
+[data-d="flu"] { --dc: var(--d-flu); } [data-d="pox"] { --dc: var(--d-pox); } [data-d="food"] { --dc: var(--d-food); }
+[data-d="eye"] { --dc: var(--d-eye); } [data-d="mumps"] { --dc: var(--d-mumps); } [data-d="covid"] { --dc: var(--d-covid); }
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { background: var(--paper); }
+body {
+  background: var(--paper); color: var(--ink);
+  font-family: var(--font-body); font-size: 18px; line-height: 1.7;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-bottom: 48px;
+  -webkit-tap-highlight-color: transparent;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--sign); }
+h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 400; margin: 0; line-height: 1.3; text-wrap: balance; }
+p { margin: 0; }
+ul, ol { margin: 0; padding: 0; list-style: none; }
+button { font: inherit; color: inherit; cursor: pointer; }
+input, textarea { font: inherit; color: var(--ink); }
+:focus-visible { outline: 3px solid var(--cue); outline-offset: 3px; }
+.wrap { max-width: 1060px; margin: 0 auto; }
+.bleed {
+  margin-left: calc(-1 * max(16px, env(safe-area-inset-left, 0px)));
+  margin-right: calc(-1 * max(16px, env(safe-area-inset-right, 0px)));
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+/* 간판 */
+.top { background: var(--sign); color: #fff; position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; }
+.top .wrap { display: flex; align-items: center; gap: 14px; padding-block: 12px; flex-wrap: wrap; }
+.logo { display: flex; align-items: center; gap: 10px; }
+.logo svg { flex: none; }
+.logo h1 { font-size: clamp(1.4rem, 4vw, 1.9rem); letter-spacing: 0.02em; }
+.logo small { display: block; font-size: 0.8rem; opacity: 0.8; font-family: var(--font-body); letter-spacing: 0.08em; }
+.top .sp { flex: 1; }
+.staff { display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.25); border-radius: 999px; padding: 4px 14px 4px 4px; font-weight: 700; font-size: 0.95rem; }
+.staff b { width: 32px; height: 32px; border-radius: 50%; background: var(--cue); color: var(--sign); display: grid; place-items: center; font-family: var(--font-display); font-weight: 400; font-size: 1.1rem; }
+.sync { font-size: 0.82rem; opacity: 0.85; }
+
+/* 단계 막대 */
+.steps { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; margin: 16px 0 18px; }
+.steps button { border: 2px solid var(--line); background: var(--card); border-radius: 12px; padding: 8px 6px; text-align: center; line-height: 1.3; min-width: 0; }
+.steps button i { display: block; font-style: normal; font-size: 0.75rem; color: var(--ink-2); font-weight: 700; }
+.steps button b { display: block; font-family: var(--font-display); font-weight: 400; font-size: 1rem; }
+.steps button.on { border-color: var(--clinic); background: var(--clinic); color: #fff; }
+.steps button.on i { color: #d7efe6; }
+.steps button.done { border-color: var(--clinic); }
+.steps button:disabled { opacity: 0.5; cursor: not-allowed; background: transparent; }
+.steps .lockic { display: inline-block; vertical-align: -2px; margin-right: 2px; }
+.part-tag { display: flex; gap: 6px; margin-top: 18px; font-size: 0.85rem; font-weight: 800; color: var(--ink-2); }
+.part-tag span { flex: 1; text-align: center; border-top: 3px solid var(--line); padding-top: 2px; }
+.part-tag span:first-child { flex: 3; border-color: var(--clinic); }
+.part-tag span:last-child { flex: 3; border-color: var(--cue); }
+
+/* 공통 판 */
+.panel { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: clamp(16px, 3vw, 28px); display: grid; gap: 18px; }
+.panel > h2 { font-size: clamp(1.45rem, 3.4vw, 1.9rem); color: var(--sign); }
+.lead { color: var(--ink-2); max-width: 62ch; }
+.say { display: flex; gap: 12px; align-items: flex-start; }
+.say .who { flex: none; width: 56px; height: 56px; border-radius: 50%; background: var(--clinic-2); display: grid; place-items: center; overflow: hidden; }
+.say .bub { background: var(--clinic-2); border-radius: 4px 16px 16px 16px; padding: 12px 16px; min-width: 0; }
+.say .bub b { color: var(--clinic); }
+.btn { border: none; background: var(--clinic); color: #fff; border-radius: 12px; padding: 12px 22px; font-weight: 800; font-size: 1.05rem; min-height: 50px; }
+.btn:disabled { background: #9fb3ac; cursor: not-allowed; }
+.btn.ghost { background: transparent; color: var(--clinic); border: 2px solid var(--clinic); }
+.btn.cue { background: var(--cue); color: var(--sign); }
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.msg { border-radius: 12px; padding: 10px 14px; font-weight: 700; }
+.msg.no { background: var(--alert-bg); color: var(--alert); }
+.msg.ok { background: var(--ok-bg); color: var(--ok); }
+.msg.info { background: var(--cue-bg); color: #6d5100; }
+.field { display: grid; gap: 6px; }
+.field label { font-weight: 800; }
+.field .hint, .hint { font-size: 0.88rem; color: var(--ink-2); }
+.inp, textarea.inp { width: 100%; border: 2px solid var(--line); border-radius: 10px; padding: 10px 12px; background: #fbfdfc; font-size: 1.05rem; }
+textarea.inp { min-height: 92px; resize: vertical; }
+.inp:focus { border-color: var(--clinic); outline: none; }
+.count { font-size: 0.85rem; color: var(--ink-2); text-align: right; font-variant-numeric: tabular-nums; }
+.count.full { color: var(--ok); font-weight: 800; }
+.blank-sent { font-size: 1.15rem; line-height: 2.2; }
+.blank-sent .inp { display: inline-block; width: 7.5em; padding: 4px 8px; text-align: center; font-weight: 800; }
+
+/* 출근 */
+.badges { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.badge-btn { border: 2px solid var(--line); background: #fbfdfc; border-radius: 16px; padding: 16px; display: flex; gap: 14px; align-items: center; text-align: left; }
+.badge-btn:hover { border-color: var(--clinic); }
+.badge-btn .no { flex: none; width: 54px; height: 54px; border-radius: 14px; background: var(--clinic); color: #fff; display: grid; place-items: center; font-family: var(--font-display); font-size: 1.7rem; }
+.badge-btn strong { font-family: var(--font-display); font-weight: 400; font-size: 1.3rem; display: block; }
+.badge-btn span { font-size: 0.9rem; color: var(--ink-2); }
+
+/* 진료 */
+.qdots { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; font-weight: 800; color: var(--ink-2); font-size: 0.95rem; }
+.qdots i { width: 28px; height: 8px; border-radius: 4px; background: var(--line); }
+.qdots i.ok { background: var(--clinic); }
+.qdots i.now { background: var(--cue); }
+.clinic-grid { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 20px; align-items: start; }
+.patient { text-align: center; display: grid; gap: 8px; justify-items: center; background: var(--clinic-2); border-radius: 16px; padding: 14px 10px; }
+.patient svg { width: 150px; height: auto; max-width: 100%; }
+.patient strong { font-family: var(--font-display); font-weight: 400; font-size: 1.25rem; }
+.patient span { font-size: 0.9rem; color: var(--ink-2); line-height: 1.4; }
+.chat { display: grid; gap: 10px; }
+.chat .q { justify-self: end; background: var(--clinic); color: #fff; border-radius: 16px 4px 16px 16px; padding: 8px 14px; font-weight: 700; max-width: 85%; }
+.chat .a { justify-self: start; background: #f4f6f5; border: 1px solid var(--line); border-radius: 4px 16px 16px 16px; padding: 10px 14px; max-width: 92%; }
+.chat .a.mark { background: var(--cue-bg); border-color: var(--cue); box-shadow: 0 0 0 3px var(--cue-bg); }
+.asks { display: flex; gap: 8px; flex-wrap: wrap; }
+.asks button { border: 2px solid var(--clinic); background: #fff; color: var(--clinic); border-radius: 999px; padding: 8px 16px; font-weight: 800; }
+.testslip { border: 2px dashed var(--ink-2); border-radius: 10px; padding: 10px 14px; background: #fff; font-weight: 800; display: flex; gap: 10px; align-items: center; }
+.testslip small { display: block; font-weight: 400; color: var(--ink-2); font-size: 0.82rem; }
+
+.chart { border: 2px solid var(--sign); border-radius: 6px; background: #fffef8; }
+.chart .head { background: var(--sign); color: #fff; padding: 8px 14px; display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-family: var(--font-display); font-size: 1.15rem; }
+.chart .head small { font-family: var(--font-body); font-size: 0.85rem; opacity: 0.85; }
+.chart .line { display: grid; grid-template-columns: 130px minmax(0, 1fr); border-top: 1px solid #d9d4c0; }
+.chart .line:first-of-type { border-top: none; }
+.chart .line > b { background: #f5f1e2; padding: 12px; border-right: 1px solid #d9d4c0; font-size: 0.98rem; }
+.chart .line > div { padding: 10px 12px; min-width: 0; display: grid; gap: 8px; }
+.chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.chip { border: 2px solid var(--line); background: #fff; border-radius: 999px; padding: 6px 14px; font-weight: 700; font-size: 0.98rem; }
+.chip.on { border-color: var(--clinic); background: var(--clinic); color: #fff; }
+.picked { font-weight: 800; color: var(--dc); }
+
+.board { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.dcard { border: 2px solid var(--line); border-top: 8px solid var(--dc); background: #fff; border-radius: 12px; padding: 10px 12px; text-align: left; display: grid; gap: 6px; align-content: start; }
+.dcard h4 { font-size: 1.25rem; color: var(--dc); }
+.dcard ul { display: grid; gap: 2px; font-size: 0.9rem; line-height: 1.45; }
+.dcard li::before { content: "· "; color: var(--dc); font-weight: 800; }
+.dcard li.hit { background: var(--cue-bg); font-weight: 800; border-radius: 4px; }
+.dcard.on { border-color: var(--dc); box-shadow: 0 0 0 3px var(--dc); }
+button.dcard:hover { border-color: var(--dc); }
+
+.linked { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-weight: 800; }
+.linked span { background: var(--clinic-2); border-radius: 10px; padding: 6px 12px; }
+.linked span.d { background: var(--dc); color: #fff; }
+.linked svg { flex: none; }
+
+/* 상황판 지도 */
+.mapbox { overflow-x: auto; border-radius: 14px; border: 1px solid var(--line); background: #e4efe7; }
+.mapbox svg { display: block; width: 100%; min-width: 620px; height: auto; }
+.legend { display: flex; gap: 8px 14px; flex-wrap: wrap; font-size: 0.9rem; font-weight: 700; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 14px; height: 14px; border-radius: 4px; background: var(--dc); }
+.stats { display: flex; gap: 10px; flex-wrap: wrap; }
+.stats div { background: var(--clinic-2); border-radius: 12px; padding: 8px 14px; font-weight: 700; }
+.stats b { font-family: var(--font-display); font-weight: 400; font-size: 1.5rem; color: var(--clinic); font-variant-numeric: tabular-nums; margin-right: 2px; }
+.wait { border: 3px dashed var(--cue); background: var(--cue-bg); border-radius: 16px; padding: 18px; display: grid; gap: 10px; justify-items: start; }
+.wait h3 { font-size: 1.35rem; color: #6d5100; }
+
+/* 안내문 */
+.split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.poster { border: 3px solid var(--dc); border-radius: 14px; overflow: hidden; background: #fff; }
+.poster .ph { background: var(--dc); color: #fff; padding: 12px 16px; }
+.poster .ph small { font-weight: 800; letter-spacing: 0.08em; font-size: 0.8rem; opacity: 0.9; }
+.poster .ph h3 { font-size: 1.6rem; }
+.poster .pb { padding: 14px 16px; display: grid; gap: 10px; }
+.poster .pb h4 { font-size: 1.05rem; color: var(--dc); }
+.poster .pb ul { display: grid; gap: 2px; }
+.poster .pb li::before { content: "· "; font-weight: 800; color: var(--dc); }
+.poster .pb .src { font-size: 0.85rem; color: var(--ink-2); border-top: 1px dashed var(--line); padding-top: 8px; }
+.poster .empty { color: #9aaba5; }
+.taken { font-size: 0.82rem; font-weight: 800; color: var(--ink-2); }
+button.dcard:disabled { opacity: 0.45; cursor: not-allowed; }
+.refbox { border: 2px solid var(--line); border-radius: 12px; padding: 12px 14px; background: #f7faf9; display: grid; gap: 6px; font-size: 0.95rem; }
+.extlink { color: var(--clinic); font-weight: 800; word-break: break-all; }
+
+/* 퍼짐 실험실 */
+.presets { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.preset { border: 2px solid var(--line); background: #fff; border-radius: 14px; padding: 12px; text-align: left; display: grid; gap: 2px; }
+.preset strong { font-family: var(--font-display); font-weight: 400; font-size: 1.2rem; }
+.preset span { font-size: 0.88rem; color: var(--ink-2); }
+.preset.on { border-color: var(--clinic); box-shadow: 0 0 0 3px var(--clinic-2); }
+.preset em { font-style: normal; font-size: 0.8rem; font-weight: 800; color: var(--ok); }
+.lab { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 16px; align-items: start; }
+.cvwrap { position: relative; border-radius: 14px; overflow: hidden; border: 2px solid var(--sign); background: #f6faf8; }
+.cvwrap canvas { display: block; width: 100%; height: auto; }
+.cvwrap .tag { position: absolute; left: 10px; top: 8px; background: rgba(18,63,53,0.85); color: #fff; border-radius: 8px; padding: 2px 10px; font-weight: 800; font-size: 0.9rem; }
+.timebar { height: 8px; background: var(--line); border-radius: 4px; overflow: hidden; }
+.timebar i { display: block; height: 100%; width: 0; background: var(--clinic); }
+.meter { display: grid; gap: 10px; }
+.meter .big { display: flex; gap: 10px; }
+.meter .big div { flex: 1; border-radius: 12px; padding: 8px 12px; background: var(--clinic-2); }
+.meter .big div.sick { background: var(--alert-bg); }
+.meter .big b { display: block; font-family: var(--font-display); font-weight: 400; font-size: 2rem; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.meter .big div.sick b { color: var(--alert); }
+.meter .big span { font-size: 0.85rem; font-weight: 800; }
+.events { display: grid; gap: 6px; }
+.events li { border-radius: 10px; padding: 6px 10px; font-size: 0.92rem; font-weight: 700; background: #f2f4f3; color: #9aaba5; display: flex; gap: 8px; align-items: center; }
+.events li i { font-style: normal; font-size: 0.75rem; border: 1px solid currentColor; border-radius: 6px; padding: 0 5px; flex: none; }
+.events li.on { background: var(--alert-bg); color: var(--alert); }
+.runs { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.runs th, .runs td { border-bottom: 1px solid var(--line); padding: 6px 8px; text-align: left; }
+.runs th { font-size: 0.88rem; color: var(--ink-2); }
+.tbl-scroll { overflow-x: auto; }
+.radios { display: grid; gap: 8px; }
+.radios button { border: 2px solid var(--line); background: #fff; border-radius: 12px; padding: 10px 14px; text-align: left; font-weight: 700; }
+.radios button.on { border-color: var(--clinic); background: var(--clinic-2); }
+
+/* 회의 */
+.cats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.cat { border: 2px solid var(--line); background: #fff; border-radius: 12px; padding: 10px; font-weight: 800; text-align: center; line-height: 1.35; }
+.cat.on { border-color: var(--alert); background: var(--alert-bg); color: var(--alert); }
+.opin { border: 1px solid var(--line); border-radius: 14px; padding: 14px; display: grid; gap: 10px; background: #fbfdfc; }
+.opin h4 { font-size: 1.1rem; }
+.meetboard { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.meetboard section { background: #f7faf9; border: 1px solid var(--line); border-radius: 12px; padding: 10px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.meetboard h4 { font-size: 1rem; color: var(--alert); }
+.note { background: #fff; border: 1px solid var(--line); border-left: 6px solid var(--cue); border-radius: 8px; padding: 8px 10px; font-size: 0.95rem; line-height: 1.5; }
+.note small { display: block; font-weight: 800; color: var(--ink-2); font-size: 0.78rem; }
+.endcard { display: grid; gap: 12px; }
+.endcard ul { display: grid; gap: 6px; }
+.endcard li { display: flex; gap: 8px; align-items: baseline; }
+.endcard li b { flex: none; width: 7.5em; color: var(--ink-2); font-size: 0.92rem; }
+
+/* 선생님 화면 */
+.tpanel { display: grid; gap: 18px; }
+.tbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; }
+.tbar h2 { font-size: 1.5rem; color: var(--sign); margin-right: auto; }
+.switch { border: 2px solid var(--cue); background: var(--cue-bg); color: #6d5100; border-radius: 12px; padding: 10px 16px; font-weight: 800; }
+.switch.open { background: var(--cue); color: var(--sign); }
+.danger { border: 2px solid var(--alert); background: #fff; color: var(--alert); border-radius: 12px; padding: 8px 14px; font-weight: 800; }
+.danger.arm { background: var(--alert); color: #fff; }
+.slots { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.slot { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; display: grid; gap: 8px; }
+.slot .sn { display: flex; gap: 10px; align-items: center; }
+.slot .sn b { width: 36px; height: 36px; border-radius: 50%; background: var(--clinic); color: #fff; display: grid; place-items: center; font-family: var(--font-display); font-weight: 400; font-size: 1.2rem; }
+.slot .sn strong { font-family: var(--font-display); font-weight: 400; font-size: 1.2rem; }
+.slot .st { font-weight: 800; color: var(--clinic); }
+.slot .st.off { color: #9aaba5; }
+.prog { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; }
+.prog i { height: 8px; border-radius: 4px; background: var(--line); }
+.prog i.ok { background: var(--clinic); }
+.tsec { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: clamp(14px, 2.5vw, 22px); display: grid; gap: 12px; }
+.tsec > h3 { font-size: 1.35rem; color: var(--sign); }
+.pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.pair > div { min-width: 0; display: grid; gap: 8px; align-content: start; }
+.pair h4 { font-size: 1.05rem; color: var(--ink-2); }
+.think { display: grid; gap: 8px; counter-reset: t; }
+.think li { counter-increment: t; display: flex; gap: 10px; align-items: baseline; font-size: 1.05rem; }
+.think li::before { content: counter(t); flex: none; width: 26px; height: 26px; border-radius: 50%; background: var(--sign); color: #fff; display: inline-grid; place-items: center; font-family: var(--font-display); font-size: 0.95rem; }
+.foot { margin-top: 22px; display: flex; gap: 14px; flex-wrap: wrap; justify-content: space-between; font-size: 0.88rem; color: var(--ink-2); }
+.foot a, .foot button { color: var(--ink-2); background: none; border: none; text-decoration: underline; padding: 0; font-size: 0.88rem; }
+.foot button.arm { color: var(--alert); font-weight: 800; }
+
+@media (max-width: 820px) {
+  .clinic-grid, .split, .lab { grid-template-columns: minmax(0, 1fr); }
+  .patient { grid-template-columns: 110px minmax(0, 1fr); text-align: left; justify-items: start; align-items: center; }
+  .patient svg { width: 100px; grid-row: span 2; }
+  .board, .presets { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cats, .meetboard { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .slots, .pair { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 560px) {
+  .steps { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .part-tag { display: none; }
+  .chart .line { grid-template-columns: minmax(0, 1fr); }
+  .chart .line > b { border-right: none; border-bottom: 1px solid #d9d4c0; padding: 6px 12px; }
+  .board, .presets, .cats, .meetboard { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .pop { animation: pop 0.35s ease-out; }
+  @keyframes pop { from { transform: scale(0.96); opacity: 0.4; } to { transform: none; opacity: 1; } }
+}
+</style>
+
+<header class="top bleed">
+  <div class="wrap">
+    <div class="logo">
+      <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="10" fill="#ffffff"/><path d="M16 8h8v8h8v8h-8v8h-8v-8H8v-8h8z" fill="#1f6f5c"/></svg>
+      <div><h1>점곡 보건소</h1><small>마을 감염병 조사 근무</small></div>
+    </div>
+    <span class="sp"></span>
+    <span class="sync" id="sync"></span>
+    <span class="staff" id="staff" hidden><b id="staffNo">1</b><span id="staffName">직원 1</span></span>
+  </div>
+</header>
+
+<main class="wrap">
+  <div id="student">
+    <div class="part-tag" aria-hidden="true"><span>1부 · 진료 접수 (2차시)</span><span>2부 · 유행 경보 (3~4차시)</span></div>
+    <nav class="steps" id="steps" aria-label="근무 단계"></nav>
+    <section id="view"></section>
+    <div class="foot">
+      <a href="#teacher" id="toTeacher">선생님 화면</a>
+      <button type="button" id="restart">처음부터 다시 하기</button>
+    </div>
+  </div>
+  <div id="teacher" hidden></div>
+</main>
+
+<script>
+/* 웹 앱으로 배포한 앱스 스크립트 주소. 비어 있으면 이 기기 안에서만 움직인다(미리보기). */
+let API_URL = 'https://script.google.com/macros/s/AKfycbxyeka_I8FpPfzMpdfpUvAKTiViwFtpJKjn_gHzUveQ1A-YKHNzSUhDzuapE72Zyx4b3g/exec';
+const TEACHER_KEY = 'jeomgok-clinic';
+/* 시험용: 주소에 ?api=http://127.0.0.1:포트/api 를 붙이면 그 가짜 서버를 쓴다(로컬 주소만). &dev= 로 기기를 나눈다. */
+const QS = new URLSearchParams(location.search);
+const TEST_API = QS.get('api');
+if (TEST_API && /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?\//.test(TEST_API)) API_URL = TEST_API;
+const TEST_DEV = (API_URL && API_URL === TEST_API) ? (QS.get('dev') || '') : '';
+const STORE = 'jeomgok-clinic-v1' + (TEST_DEV ? '-' + TEST_DEV : '');
+const LOCAL_P2 = 'jeomgok-clinic-part2';
+
+/* ───────── 내용 (근거: 비상교과서 과학 3-2 지도서 「감염병과 건강한 생활」 2~4차시) ───────── */
+const SYM = {
+  fever: '열이 나요', head: '머리가 아파요', body: '몸이 아파요', cough: '기침이 나요', throat: '목이나 코가 아파요',
+  blister: '몸에 물집이 생겨요', itchy: '몸이 가려워요', belly: '배가 아파요', vomit: '토하거나 설사를 해요',
+  eyeitch: '눈이 가려워요', eyered: '눈이 빨개져요', goop: '눈곱이 많이 껴요', lid: '눈꺼풀이 부어요', cheek: '볼이 붓고 아파요'
+};
+const DIS = [
+  { id: 'flu', name: '독감', sym: ['fever', 'head', 'body', 'cough', 'throat'],
+    ref: { sy: ['열이 나거나 머리가 아프다.', '몸에 통증이 나타난다.', '기침이 나고 목과 코에 통증이 나타난다.'], ft: ['다른 사람에게 병을 옮길 수 있다.', '겨울철에 자주 유행한다.'] },
+    kw: ['열', '머리', '몸', '기침', '목', '코'] },
+  { id: 'pox', name: '수두', sym: ['blister', 'itchy', 'fever', 'body'],
+    ref: { sy: ['몸에 물집이 생기고 가렵다.', '열이 나거나 몸에 통증이 나타난다.'], ft: ['다른 사람에게 병을 옮길 수 있다.', '봄에 학생들 사이에 자주 유행한다.'] },
+    kw: ['물집', '가려', '가렵', '열', '몸'] },
+  { id: 'food', name: '식중독', sym: ['belly', 'vomit', 'fever', 'head', 'body'],
+    ref: { sy: ['배탈이 나고 구토나 설사를 한다.', '열이 나거나 머리에 통증이 나타난다.', '몸에 통증이 나타난다.'], ft: ['다른 사람에게 병을 옮길 수 있다.', '상한 음식이나 오염된 물을 먹고 걸릴 수 있다.'] },
+    kw: ['배', '토', '설사', '구토', '열', '머리', '몸'] },
+  { id: 'eye', name: '결막염', sym: ['eyeitch', 'lid', 'goop', 'eyered'],
+    ref: { sy: ['눈이 가렵고, 눈꺼풀이 붓는다.', '눈에 눈곱이 많이 끼거나 눈이 붉어진다.'], ft: ['다른 사람에게 병을 옮길 수 있다.'] },
+    kw: ['눈'] },
+  { id: 'mumps', name: '볼거리', sym: ['cheek', 'fever', 'body'],
+    ref: { sy: ['볼이 붓고 볼에 통증이 나타난다.', '열이 나거나 몸에 통증이 나타난다.'], ft: ['다른 사람에게 병을 옮길 수 있다.', '봄에 학생들 사이에 자주 유행한다.'] },
+    kw: ['볼', '열', '몸'] },
+  { id: 'covid', name: '코로나19', sym: ['fever', 'body', 'throat', 'cough'],
+    ref: { sy: ['열이 나거나 몸살이 난다.', '목이나 코가 아프고 기침을 한다.'], ft: ['다른 사람에게 병을 옮길 수 있다.'] },
+    kw: ['열', '몸', '목', '코', '기침'] }
+];
+const DM = Object.fromEntries(DIS.map(d => [d.id, d]));
+/* 지도(SVG 속성)에서 쓰는 감염병 색. CSS의 --d-* 값과 같다. */
+const DCOL = { flu: '#2f66c0', pox: '#d0542a', food: '#6f7d10', eye: '#bf3478', mumps: '#7650bd', covid: '#a87200' };
+
+const PLACES = {
+  pool: { x: 110, y: 85, t: '수영장' }, kinder: { x: 300, y: 85, t: '유치원' }, school: { x: 500, y: 85, t: '학교' },
+  daycare: { x: 700, y: 85, t: '어린이집' }, valley: { x: 890, y: 85, t: '계곡' },
+  play: { x: 110, y: 280, t: '놀이터' }, cinema: { x: 300, y: 280, t: '영화관' }, market: { x: 700, y: 280, t: '시장' },
+  restaurant: { x: 890, y: 280, t: '식당' }, hall: { x: 110, y: 475, t: '마을회관' }, grandma: { x: 300, y: 475, t: '할머니 댁' },
+  wedding: { x: 700, y: 475, t: '결혼식장' }
+};
+
+const Q = ['어디에 다녀왔나요?', '어디가 아픈가요?', '주변에 비슷하게 아픈 사람이 있나요?'];
+/* 직원 1과 직원 2는 서로 다른 주민을 만난다. 감염병 6가지는 같고 장소가 다르다. */
+const PATIENTS = {
+  1: [
+    { d: 'eye', p: 'pool', who: '중학생 형', note: '어제부터 눈이 불편하대요', look: { skin: '#f1c7a1', hair: '#2a1f17', style: 'short', shirt: '#3d7fd1' },
+      keys: ['수영장'], a: ['지난 주말에 사람이 아주 많은 수영장에 다녀왔어요.', '눈이 가렵고 눈곱이 많이 껴요. 거울을 보니 눈이 빨개졌어요.', '같이 수영장에 간 친구도 눈이 빨개졌대요.'], sy: ['eyeitch', 'goop', 'eyered'] },
+    { d: 'pox', p: 'kinder', who: '유치원 동생', note: '엄마와 함께 왔어요', look: { skin: '#f4cfae', hair: '#3a2a1c', style: 'pony', shirt: '#f08aa8', kid: true },
+      keys: ['유치원'], a: ['(엄마) 날마다 유치원에 다녀요. 한 반에 친구가 스무 명쯤 있어요.', '(엄마) 몸에 물집이 생겼고, 가렵다고 자꾸 긁어요. 열도 나요.', '(엄마) 같은 반 친구 여럿이 몸에 물집이 생겨서 유치원을 쉬고 있대요.'], sy: ['blister', 'itchy', 'fever'] },
+    { d: 'mumps', p: 'play', who: '초등학생 친구', note: '학교를 마치고 왔어요', look: { skin: '#eebd94', hair: '#1f1a16', style: 'short', shirt: '#4caf6e', kid: true },
+      keys: ['놀이터'], a: ['학교 끝나고 놀이터에서 친구들이랑 술래잡기를 했어요.', '볼이 붓고 아파요. 열도 나요.', '같이 논 친구도 볼이 부어서 학교에 못 왔어요.'], sy: ['cheek', 'fever'] },
+    { d: 'food', p: 'hall', who: '이웃 할아버지', note: '배를 문지르며 오셨어요', look: { skin: '#e9b98f', hair: '#d9d9d9', style: 'old', shirt: '#8a6d4b', glasses: true },
+      keys: ['마을회관', '회관', '잔치'], a: ['마을회관 잔치에 다녀왔어요. 마을 사람들이 다 모였지요.', '더운 날 밖에 오래 둔 음식을 먹었더니 배가 아파요. 토하고 설사도 했어요.', '잔치에서 같은 음식을 먹은 사람들도 배가 아프대요.'], sy: ['belly', 'vomit'] },
+    { d: 'flu', p: 'cinema', who: '회사원 아저씨', note: '얼굴이 빨개요', look: { skin: '#f0c49c', hair: '#2b2622', style: 'short', shirt: '#55606e' },
+      keys: ['영화관', '극장'], a: ['주말에 자리가 꽉 찬 영화관에서 영화를 봤어요.', '열이 나고 머리가 아파요. 기침도 나요.', '옆자리 사람이 영화 보는 내내 기침을 했어요.'], sy: ['fever', 'head', 'cough'],
+      test: { t: '독감 검사', r: '걸림' } },
+    { d: 'covid', p: 'grandma', who: '대학생 누나', note: '목소리가 쉬었어요', look: { skin: '#f3cba8', hair: '#4a2f22', style: 'long', shirt: '#c9a227' },
+      keys: ['할머니', '친척', '명절', '추석'], a: ['추석에 친척들이 많이 모인 할머니 댁에 다녀왔어요.', '열이 나고 몸살이 나서 온몸이 아파요. 목도 아프고 기침이 나요.', '그날 모였던 친척 몇 명도 열이 난대요.'], sy: ['fever', 'body', 'throat', 'cough'],
+      test: { t: '코로나19 검사', r: '걸림' } }
+  ],
+  2: [
+    { d: 'eye', p: 'valley', who: '초등학생 동생', note: '눈을 자꾸 비벼요', look: { skin: '#f2c9a5', hair: '#2a1f17', style: 'pony', shirt: '#2fa3a8', kid: true },
+      keys: ['계곡'], a: ['여름 방학에 사람들이 많이 놀러 온 계곡에서 물놀이를 했어요.', '눈꺼풀이 붓고 눈이 가려워요. 눈곱도 많이 껴요.', '같이 물놀이한 오빠도 눈이 빨개졌어요.'], sy: ['lid', 'eyeitch', 'goop'] },
+    { d: 'pox', p: 'school', who: '초등학생 형', note: '팔을 자꾸 긁어요', look: { skin: '#eebd94', hair: '#1f1a16', style: 'short', shirt: '#e0703a', kid: true },
+      keys: ['학교', '교실'], a: ['학교에 다녀요. 반 친구들과 하루 종일 교실에서 함께 지내요.', '몸에 물집이 생겼어요. 열이 나고 몸이 아파요.', '우리 반에 몸에 물집이 생겨서 학교를 쉬는 친구가 몇 명 있어요.'], sy: ['blister', 'fever', 'body'] },
+    { d: 'mumps', p: 'daycare', who: '어린이집 선생님', note: '볼을 감싸고 왔어요', look: { skin: '#f3cba8', hair: '#3b2a20', style: 'long', shirt: '#9b7ad1' },
+      keys: ['어린이집'], a: ['어린이집에서 아이들을 돌봐요. 봄이라 새로 온 아이들이 많아요.', '볼이 붓고 아파요. 열이 나고 몸도 아파요.', '우리 어린이집 아이들 여럿이 볼이 부어서 쉬고 있어요.'], sy: ['cheek', 'fever', 'body'] },
+    { d: 'food', p: 'restaurant', who: '옆집 아주머니', note: '얼굴빛이 안 좋아요', look: { skin: '#efc29b', hair: '#2d2420', style: 'long', shirt: '#d65f5f' },
+      keys: ['식당'], a: ['손님이 많은 식당에서 가족과 점심을 먹었어요.', '덜 익은 음식을 먹은 뒤로 배가 아파요. 머리도 아파요.', '같이 밥을 먹은 가족도 모두 배가 아프대요.'], sy: ['belly', 'head'] },
+    { d: 'flu', p: 'market', who: '사과밭 할머니', note: '기침을 하며 오셨어요', look: { skin: '#e7b68c', hair: '#e2e2e2', style: 'old', shirt: '#b2463d' },
+      keys: ['시장', '장날', '장터'], a: ['장날에 사람이 북적이는 시장에 다녀왔어요.', '열이 나고 온몸이 아파요. 기침도 나요.', '시장에서 만난 이웃도 기침을 하더라고요.'], sy: ['fever', 'body', 'cough'],
+      test: { t: '독감 검사', r: '걸림' } },
+    { d: 'covid', p: 'wedding', who: '이웃 청년', note: '목을 만지며 왔어요', look: { skin: '#f0c49c', hair: '#222', style: 'short', shirt: '#3c4a8a' },
+      keys: ['결혼식', '예식'], a: ['손님이 아주 많은 결혼식장에 다녀왔어요.', '목이 아프고 기침이 나요. 열도 나요.', '결혼식에 왔던 친구 몇 명도 열이 난대요.'], sy: ['throat', 'cough', 'fever'],
+      test: { t: '코로나19 검사', r: '걸림' } }
+  ]
+};
+
+const CATS = [
+  { id: 'body', t: '내 몸이 아파요' },
+  { id: 'life', t: '생활이 불편해져요' },
+  { id: 'spread', t: '다른 사람에게 옮겨요' },
+  { id: 'many', t: '많은 사람이 위험해져요' }
+];
+const PRESETS = [
+  { id: 'park', t: '한산한 공원', n: 8, s: '사람 8명' },
+  { id: 'class', t: '우리 교실', n: 20, s: '사람 20명' },
+  { id: 'cinema', t: '꽉 찬 영화관', n: 40, s: '사람 40명' }
+];
+const EVENTS = [
+  { at: 3, t: '학교와 회사를 쉬는 사람이 생겼어요' },
+  { at: 6, t: '보건소 앞에 줄이 길어졌어요' },
+  { at: 12, t: '문을 닫는 가게와 학원이 생겼어요' },
+  { at: 20, t: '마을 행사가 취소됐어요' }
+];
+const STEPS = ['출근', '진료 접수', '마을 상황판', '주민 안내문', '퍼짐 실험실', '보건소 회의'];
+
+/* ───────── 도구 ───────── */
+const $ = s => document.querySelector(s);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const norm = s => String(s || '').replace(/\s+/g, '');
+const rid = () => 'd' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const ARROW = '<svg width="22" height="14" viewBox="0 0 22 14" aria-hidden="true"><path d="M1 7h17M13 2l6 5-6 5" stroke="#4c645d" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const LOCK = '<svg class="lockic" width="12" height="14" viewBox="0 0 12 14" aria-hidden="true"><rect x="1" y="6" width="10" height="7.5" rx="1.5" fill="currentColor"/><path d="M3.3 6V4.2a2.7 2.7 0 0 1 5.4 0V6" stroke="currentColor" stroke-width="1.6" fill="none"/></svg>';
+const shuffle = a => { const b = a.slice(); for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; };
+
+function fresh(device) {
+  return {
+    device: device || rid(), n: 0, view: 1, max: 1,
+    defn: ['', ''], defnOk: false,
+    pi: 0, pat: [],
+    learn: '', blank1: '', exp: '', noExp: false, sent1: false,
+    notice: { d: '', sy: ['', '', ''], feat: '', src: '', ok: false, start: 0 },
+    sim: { runs: [], park: '', cinema: '', trend: '', why: '', ok: false },
+    meet: { ops: [{ cat: '', text: '' }, { cat: '', text: '' }], blank: '', life: '', ok: false },
+    fails: {}, pool: {}
+  };
+}
+function load() { try { const s = JSON.parse(localStorage.getItem(STORE)); if (s && s.device) return Object.assign(fresh(s.device), s); } catch (e) {} return null; }
+let S = load() || fresh();
+function save() { try { localStorage.setItem(STORE, JSON.stringify(S)); } catch (e) {} }
+function patOf(i) { if (!S.pat[i]) S.pat[i] = { order: [], place: '', sy: [], d: '', ok: false }; return S.pat[i]; }
+const myPatients = () => PATIENTS[S.n] || PATIENTS[1];
+
+let part2 = false;
+let slots = [];
+try { part2 = localStorage.getItem(LOCAL_P2) === '1'; } catch (e) {}
+
+/* 틀리면 잠깐 잠근다. 같은 곳에서 틀릴수록 길어진다. */
+const lockUntil = {};
+function fail(key, btn, box, text) {
+  S.fails[key] = (S.fails[key] || 0) + 1; save();
+  const c = S.fails[key];
+  const secs = [3, 6, 10][Math.min(c, 3) - 1];
+  lockUntil[key] = Date.now() + secs * 1000;
+  box.className = 'msg no pop'; box.hidden = false; box.innerHTML = text;
+  if (btn) {
+    const label = btn.dataset.label || btn.textContent;
+    btn.dataset.label = label;
+    btn.disabled = true;
+    const tick = () => {
+      const left = Math.ceil((lockUntil[key] - Date.now()) / 1000);
+      if (left <= 0 || !document.body.contains(btn)) { btn.disabled = false; btn.textContent = label; return; }
+      btn.textContent = left + '초 뒤에 다시 확인';
+      setTimeout(tick, 250);
+    };
+    tick();
+  }
+  return c;
+}
+function okMsg(box, text) { box.className = 'msg ok pop'; box.hidden = false; box.innerHTML = text; }
+
+function countBind(inp, out, min, onChange) {
+  const up = () => {
+    const n = norm(inp.value).length;
+    out.textContent = n + ' / ' + min + '자';
+    out.classList.toggle('full', n >= min);
+    if (onChange) onChange(inp.value);
+  };
+  inp.addEventListener('input', up); up();
+}
+
+/* ───────── 주민 얼굴 ───────── */
+function avatar(look, d) {
+  const L = look, kid = L.kid;
+  const hy = kid ? 64 : 58, r = kid ? 30 : 33;
+  let hair = '';
+  if (L.style === 'short') hair = `<path d="M${60 - r} ${hy - 4} Q${60 - r} ${hy - r - 10} 60 ${hy - r - 6} Q${60 + r} ${hy - r - 10} ${60 + r} ${hy - 4} Q${60 + r - 6} ${hy - r + 4} 60 ${hy - r + 6} Q${60 - r + 6} ${hy - r + 4} ${60 - r} ${hy - 4}Z" fill="${L.hair}"/>`;
+  if (L.style === 'long') hair = `<path d="M${60 - r - 4} ${hy + 30} L${60 - r - 4} ${hy - 6} Q${60 - r} ${hy - r - 12} 60 ${hy - r - 7} Q${60 + r} ${hy - r - 12} ${60 + r + 4} ${hy - 6} L${60 + r + 4} ${hy + 30} L${60 + r - 6} ${hy + 30} L${60 + r - 6} ${hy - 8} Q60 ${hy - r + 8} ${60 - r + 6} ${hy - 8} L${60 - r + 6} ${hy + 30}Z" fill="${L.hair}"/>`;
+  if (L.style === 'pony') hair = `<circle cx="${60 + r + 4}" cy="${hy - 14}" r="9" fill="${L.hair}"/><circle cx="${60 - r - 4}" cy="${hy - 14}" r="9" fill="${L.hair}"/><path d="M${60 - r} ${hy - 2} Q${60 - r} ${hy - r - 10} 60 ${hy - r - 6} Q${60 + r} ${hy - r - 10} ${60 + r} ${hy - 2} Q60 ${hy - r + 2} ${60 - r} ${hy - 2}Z" fill="${L.hair}"/>`;
+  if (L.style === 'old') hair = `<path d="M${60 - r - 1} ${hy + 2} Q${60 - r - 2} ${hy - 22} ${60 - r + 10} ${hy - r + 2} L${60 - r + 14} ${hy - 6}Z M${60 + r + 1} ${hy + 2} Q${60 + r + 2} ${hy - 22} ${60 + r - 10} ${hy - r + 2} L${60 + r - 14} ${hy - 6}Z" fill="${L.hair}"/>`;
+  const ex = 13, ey = hy + 2;
+  let eyes = `<circle cx="${60 - ex}" cy="${ey}" r="3.6" fill="#1d1d1d"/><circle cx="${60 + ex}" cy="${ey}" r="3.6" fill="#1d1d1d"/>`;
+  let extra = '', cheeks = '', tint = '', mouth = `<path d="M${53} ${hy + 18} Q60 ${hy + 13} 67 ${hy + 18}" stroke="#7a3b2a" stroke-width="2.4" fill="none" stroke-linecap="round"/>`;
+  if (d === 'eye') {
+    eyes = [60 - ex, 60 + ex].map(x => `<ellipse cx="${x}" cy="${ey}" rx="7" ry="5" fill="#ffd9dc" stroke="#e0435a" stroke-width="2"/><circle cx="${x}" cy="${ey}" r="2.8" fill="#1d1d1d"/><circle cx="${x + 5}" cy="${ey + 5}" r="1.8" fill="#e8c34a"/>`).join('');
+    extra = `<path d="M${60 - ex - 8} ${ey - 9} l5 2 M${60 + ex + 8} ${ey - 9} l-5 2" stroke="#7a3b2a" stroke-width="2" stroke-linecap="round"/>`;
+  }
+  if (d === 'pox') {
+    const pts = [[-18, 12], [16, 14], [-6, -14], [22, -4], [-24, -2], [4, 22], [10, -20]];
+    extra = pts.map(([x, y]) => `<circle cx="${60 + x}" cy="${hy + y}" r="3" fill="#e2574c" opacity="0.85"/>`).join('') +
+      `<circle cx="22" cy="128" r="2.6" fill="#e2574c"/><circle cx="34" cy="122" r="2.6" fill="#e2574c"/><circle cx="92" cy="126" r="2.6" fill="#e2574c"/>`;
+  }
+  if (d === 'mumps') {
+    extra = `<ellipse cx="${60 + r - 4}" cy="${hy + 14}" rx="15" ry="14" fill="${L.skin}" stroke="#c98a6a" stroke-width="2"/><path d="M${60 + r - 8} ${hy + 10} q4 3 0 7" stroke="#e2574c" stroke-width="2" fill="none"/>`;
+    cheeks = `<ellipse cx="${60 - ex - 6}" cy="${hy + 12}" rx="6" ry="4" fill="#f28b82" opacity="0.6"/>`;
+  }
+  if (d === 'food') {
+    tint = `<circle cx="60" cy="${hy}" r="${r}" fill="#9cc56a" opacity="0.28"/>`;
+    extra = `<path d="M${60 + r - 2} ${hy - 16} q5 8 0 12 q-5 -4 0 -12z" fill="#7fc4e8"/>`;
+    mouth = `<path d="M52 ${hy + 19} q4 -4 8 0 q4 4 8 0" stroke="#7a3b2a" stroke-width="2.4" fill="none" stroke-linecap="round"/>`;
+  }
+  if (d === 'flu' || d === 'covid') {
+    cheeks = `<ellipse cx="${60 - ex - 4}" cy="${hy + 11}" rx="7" ry="4.5" fill="#f2665a" opacity="0.55"/><ellipse cx="${60 + ex + 4}" cy="${hy + 11}" rx="7" ry="4.5" fill="#f2665a" opacity="0.55"/>`;
+    mouth = `<ellipse cx="60" cy="${hy + 17}" rx="4" ry="3.2" fill="#7a3b2a"/>`;
+    extra = `<path d="M${60 + 10} ${hy + 16} q8 -2 12 -8 M${60 + 12} ${hy + 20} q10 0 15 -3 M${60 + 10} ${hy + 24} q8 3 13 7" stroke="#8fa3ad" stroke-width="2.2" fill="none" stroke-linecap="round"/>`;
+    if (d === 'flu') extra += `<rect x="${60 - 6}" y="${hy - r - 2}" width="12" height="8" rx="3" fill="#ffffff" stroke="#c7d3d9"/>`;
+  }
+  const glasses = L.glasses ? `<circle cx="${60 - ex}" cy="${ey}" r="8" fill="none" stroke="#5a4a3a" stroke-width="2"/><circle cx="${60 + ex}" cy="${ey}" r="8" fill="none" stroke="#5a4a3a" stroke-width="2"/><path d="M${60 - ex + 8} ${ey} h${2 * ex - 16}" stroke="#5a4a3a" stroke-width="2"/>` : '';
+  const sh = kid ? 106 : 102;
+  return `<svg viewBox="0 0 120 140" role="img" aria-label="주민 얼굴">
+    <path d="M14 140 Q16 ${sh} 60 ${sh - 4} Q104 ${sh} 106 140Z" fill="${L.shirt}"/>
+    <rect x="52" y="${hy + r - 8}" width="16" height="14" fill="${L.skin}"/>
+    ${L.style === 'long' ? hair : ''}
+    <circle cx="60" cy="${hy}" r="${r}" fill="${L.skin}"/>
+    ${tint}${L.style !== 'long' ? hair : `<path d="M${60 - r} ${hy - 4} Q${60 - r} ${hy - r - 10} 60 ${hy - r - 6} Q${60 + r} ${hy - r - 10} ${60 + r} ${hy - 4} Q60 ${hy - r + 4} ${60 - r} ${hy - 4}Z" fill="${L.hair}"/>`}
+    ${cheeks}${eyes}${glasses}${mouth}${extra}
+  </svg>`;
+}
+const NURSE = `<svg viewBox="0 0 56 56" width="56" height="56" aria-hidden="true"><circle cx="28" cy="30" r="15" fill="#f1c7a1"/><path d="M13 27 Q14 12 28 12 Q42 12 43 27 Q36 19 28 19 Q20 19 13 27Z" fill="#2f2620"/><rect x="18" y="7" width="20" height="9" rx="3" fill="#ffffff" stroke="#1f6f5c" stroke-width="1.5"/><path d="M26.5 9h3v2h2v3h-2v2h-3v-2h-2v-3h2z" fill="#1f6f5c" transform="translate(0,-1) scale(1)"/><circle cx="23" cy="31" r="1.8" fill="#222"/><circle cx="33" cy="31" r="1.8" fill="#222"/><path d="M24 37 Q28 40 32 37" stroke="#7a3b2a" stroke-width="1.8" fill="none" stroke-linecap="round"/><path d="M6 56 Q8 46 28 45 Q48 46 50 56Z" fill="#ffffff" stroke="#cbdad4"/></svg>`;
+
+/* ───────── 마을 상황판 지도 ───────── */
+function mapSVG(cases) {
+  const byPlace = {};
+  cases.forEach(c => { (byPlace[c.p] = byPlace[c.p] || []).push(c); });
+  const roads = `<g stroke="#cfdcd4" stroke-width="26" stroke-linecap="round">
+    <path d="M10 182H990M10 378H990M205 10V550M400 10V550M600 10V550M795 10V550"/></g>
+    <g stroke="#ffffff" stroke-width="2" stroke-dasharray="10 12"><path d="M10 182H990M10 378H990M205 10V550M400 10V550M600 10V550M795 10V550"/></g>`;
+  const trees = [[470, 470], [520, 500], [545, 452], [860, 470], [905, 500], [930, 455]]
+    .map(([x, y]) => `<circle cx="${x}" cy="${y}" r="16" fill="#9cc79f"/><circle cx="${x}" cy="${y - 4}" r="9" fill="#b9dbb6"/>`).join('');
+  const apples = `<text x="500" y="540" text-anchor="middle" font-size="15" font-weight="700" fill="#5e7f62">숲길</text><text x="890" y="548" text-anchor="middle" font-size="15" font-weight="700" fill="#5e7f62">사과밭</text>
+    <circle cx="872" cy="490" r="4" fill="#d9534f"/><circle cx="898" cy="512" r="4" fill="#d9534f"/><circle cx="925" cy="470" r="4" fill="#d9534f"/>`;
+  const clinic = `<g><rect x="415" y="238" width="170" height="86" rx="14" fill="#1f6f5c"/>
+    <path d="M440 266h8v-8h8v8h8v8h-8v8h-8v-8h-8z" fill="#ffffff"/>
+    <text x="520" y="288" text-anchor="middle" font-size="22" fill="#ffffff" font-family="Jua, sans-serif">점곡 보건소</text></g>`;
+  const tiles = Object.entries(PLACES).map(([id, P]) => {
+    const list = byPlace[id] || [];
+    const has = list.length > 0;
+    const col = has ? DCOL[list[0].d] : '#cbdad4';
+    const pins = list.map((c, i) => {
+      const w = 116, x = P.x - w / 2, y = P.y + 6 + i * 26;
+      return `<g><rect x="${x}" y="${y}" width="${w}" height="22" rx="11" fill="${DCOL[c.d]}"/>
+        <text x="${P.x}" y="${y + 16}" text-anchor="middle" font-size="14" font-weight="800" fill="#ffffff">${esc(DM[c.d].name)}${c.who ? ' · 직원' + c.who : ''}</text></g>`;
+    }).join('');
+    const h = 80 + Math.max(0, list.length - 1) * 26;
+    return `<g><rect x="${P.x - 76}" y="${P.y - 40}" width="152" height="${h}" rx="12" fill="#ffffff" stroke="${col}" stroke-width="${has ? 4 : 2}"/>
+      <text x="${P.x}" y="${P.y - 12}" text-anchor="middle" font-size="19" fill="#17312b" font-family="Jua, sans-serif">${P.t}</text>
+      ${has ? `<circle cx="${P.x + 64}" cy="${P.y - 40}" r="13" fill="${col}"/><text x="${P.x + 64}" y="${P.y - 35}" text-anchor="middle" font-size="14" font-weight="800" fill="#ffffff">${list.length}</text>` : `<text x="${P.x}" y="${P.y + 20}" text-anchor="middle" font-size="13" fill="#9aaba5">환자 없음</text>`}
+      ${pins}</g>`;
+  }).join('');
+  return `<svg viewBox="0 0 1000 560" role="img" aria-label="점곡 마을 상황판: 감염병 환자가 다녀온 곳">${roads}${trees}${apples}${clinic}${tiles}</svg>`;
+}
+function legend() {
+  return `<div class="legend">${DIS.map(d => `<span data-d="${d.id}"><i></i>${d.name}</span>`).join('')}</div>`;
+}
+function myCases() {
+  return myPatients().map((p, i) => (S.pat[i] && S.pat[i].ok) ? { p: p.p, d: p.d, who: S.n } : null).filter(Boolean);
+}
+function allCases() {
+  const list = myCases();
+  slots.forEach(sl => {
+    if (!sl.data || sl.n === S.n) return;
+    (sl.data.cases || []).forEach(c => list.push({ p: c.p, d: c.d, who: sl.n }));
+  });
+  return list;
+}
+function statsHTML(cases) {
+  const places = new Set(cases.map(c => c.p)).size, dis = new Set(cases.map(c => c.d)).size;
+  return `<div class="stats"><div><b>${cases.length}</b>명 진료</div><div><b>${dis}</b>가지 감염병</div><div><b>${places}</b>곳에서 생김</div></div>`;
+}
+
+/* ───────── 보건소(구글 시트) 연결 ───────── */
+async function apiGet(params) {
+  const q = new URLSearchParams(params).toString();
+  const r = await fetch(API_URL + '?' + q, { method: 'GET', redirect: 'follow', cache: 'no-store' });
+  if (!r.ok) throw new Error('http ' + r.status);
+  return r.json();
+}
+async function apiPost(body) {
+  const opts = { method: 'POST', redirect: 'follow', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body) };
+  try {
+    const r = await fetch(API_URL, opts);
+    return await r.json();
+  } catch (e) {
+    await fetch(API_URL, Object.assign({}, opts, { mode: 'no-cors' }));
+    const st = await apiGet({ action: 'state' });
+    const slot = st.slots && st.slots[body.n - 1];
+    if (slot && slot.device === body.device) return { ok: true };
+    throw e;
+  }
+}
+function card() {
+  return {
+    stage: S.max, set: S.n,
+    defn: S.defn,
+    cases: myCases().map(c => ({ p: c.p, d: c.d })),
+    learn: S.learn, exp: S.noExp ? '(걸린 적 없음) ' + S.exp : S.exp, sent1: S.sent1,
+    notice: S.notice.ok ? { d: S.notice.d, sy: S.notice.sy.filter(s => s.trim()), feat: S.notice.feat, src: S.notice.src } : (S.notice.d ? { d: S.notice.d, draft: true } : null),
+    sim: { runs: S.sim.runs.slice(-8), park: S.sim.park, cinema: S.sim.cinema, trend: S.sim.trend, why: S.sim.why, ok: S.sim.ok },
+    meet: S.meet.ok ? { ops: S.meet.ops, life: S.meet.life } : null
+  };
+}
+let pushing = false, pushAgain = false;
+function setSync(t) { $('#sync').textContent = t; }
+async function push() {
+  save();
+  if (!API_URL || !S.n) { setSync(API_URL ? '' : '미리보기: 이 기기에만 저장'); return; }
+  if (pushing) { pushAgain = true; return; }
+  pushing = true; setSync('보내는 중…');
+  try {
+    const r = await apiPost({ action: 'save', n: S.n, device: S.device, card: card() });
+    if (r && r.ok) {
+      const d = new Date(); setSync('저장됨 ' + d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0'));
+    } else if (r && r.reason === 'notyours') {
+      setSync('다른 기기가 이 번호를 쓰고 있어요');
+    } else setSync('보내지 못함');
+  } catch (e) { setSync('보내지 못함 · 인터넷을 확인해 봅시다'); }
+  pushing = false;
+  if (pushAgain) { pushAgain = false; push(); }
+}
+async function pull() {
+  if (!API_URL) {
+    slots = [];
+    try { part2 = localStorage.getItem(LOCAL_P2) === '1'; } catch (e) {}
+    return true;
+  }
+  try {
+    const st = await apiGet({ action: 'state' });
+    if (st && st.ok) { slots = st.slots || []; part2 = !!st.part2; return true; }
+  } catch (e) {}
+  return false;
+}
+
+/* ───────── 학생 화면 ───────── */
+function stepOpen(n) {
+  if (n === 1) return true;
+  if (!S.n) return false;
+  if (n <= 3) return n <= S.max;
+  return part2 && S.sent1 && n <= S.max;
+}
+function go(n) { S.view = n; if (n > S.max) S.max = n; save(); render(); window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' }); }
+
+function renderSteps() {
+  $('#steps').innerHTML = STEPS.map((t, i) => {
+    const n = i + 1, open = stepOpen(n), locked = n >= 4 && !(part2 && S.sent1);
+    return `<button type="button" data-step="${n}" class="${S.view === n ? 'on' : ''} ${n < S.max ? 'done' : ''}" ${open ? '' : 'disabled'}>
+      <i>${locked ? LOCK : ''}${n <= 3 ? '1부' : '2부'} · ${n}</i><b>${t}</b></button>`;
+  }).join('');
+  $('#steps').querySelectorAll('button').forEach(b => b.addEventListener('click', () => go(Number(b.dataset.step))));
+  const st = $('#staff');
+  st.hidden = !S.n;
+  if (S.n) { $('#staffNo').textContent = S.n; $('#staffName').textContent = '직원 ' + S.n; }
+}
+
+function render() {
+  const teacher = location.hash === '#teacher';
+  $('#student').hidden = teacher; $('#teacher').hidden = !teacher;
+  if (teacher) { renderTeacher(); return; }
+  if (!S.n) S.view = 1;
+  renderSteps();
+  const v = $('#view');
+  v.innerHTML = '';
+  ({ 1: viewStart, 2: viewClinic, 3: viewBoard, 4: viewNotice, 5: viewLab, 6: viewMeet, 7: viewEnd })[S.view]();
+}
+
+/* 1. 출근 */
+function viewStart() {
+  const v = $('#view');
+  if (!S.n) {
+    v.innerHTML = `<div class="panel pop">
+      <h2>점곡 보건소에 오신 것을 환영해요</h2>
+      <p class="lead">오늘 여러분은 보건소 신입 직원입니다. 아픈 주민을 만나 이야기를 듣고, 마을에 어떤 감염병이 생겼는지 기록해 봅시다.</p>
+      <div class="badges">
+        <button type="button" class="badge-btn" data-n="1"><span class="no">1</span><div><strong>직원 1번으로 출근</strong><span>${API_URL ? '' : '미리보기: '}주민 6명을 만나요</span></div></button>
+        <button type="button" class="badge-btn" data-n="2"><span class="no">2</span><div><strong>직원 2번으로 출근</strong><span>${API_URL ? '' : '미리보기: '}다른 주민 6명을 만나요</span></div></button>
+      </div>
+      <p class="msg info">선생님이 알려 준 번호를 눌러 봅시다. 친구와 같은 번호는 고를 수 없어요.</p>
+      <p class="msg no" id="claimMsg" hidden></p>
+    </div>`;
+    v.querySelectorAll('.badge-btn').forEach(b => b.addEventListener('click', () => claim(Number(b.dataset.n), b)));
+    return;
+  }
+  v.innerHTML = `<div class="panel pop">
+    <h2>직원 ${S.n}님, 첫 근무 안내입니다</h2>
+    <div class="say"><span class="who">${NURSE}</span><div class="bub">
+      <p>평소에 건강하던 사람도 <b>독감</b> 같은 감염병에 걸릴 수 있어요.</p>
+      <p><b>감염병</b>은 세균이나 바이러스가 우리 몸에 들어와 걸리는 질병이에요. 세균과 바이러스는 너무 작아서 눈에 보이지 않아요.</p>
+    </div></div>
+    <div class="field">
+      <label>선배의 말을 읽고 빈칸을 채워 봅시다.</label>
+      <p class="blank-sent">감염병은 <input class="inp" id="df0" autocomplete="off" value="${esc(S.defn[0])}" aria-label="첫째 빈칸">이나
+        <input class="inp" id="df1" autocomplete="off" value="${esc(S.defn[1])}" aria-label="둘째 빈칸">가 우리 몸에 들어와 걸리는 질병입니다.</p>
+    </div>
+    <p id="dfMsg" hidden></p>
+    <div class="row"><button class="btn" id="dfBtn" type="button">${S.defnOk ? '진료실로 가기' : '확인하기'}</button></div>
+  </div>`;
+  ['df0', 'df1'].forEach((id, i) => $('#' + id).addEventListener('input', e => { S.defn[i] = e.target.value; save(); }));
+  $('#dfBtn').addEventListener('click', e => {
+    const a = norm(S.defn[0]), b = norm(S.defn[1]);
+    const ok = (a === '세균' && b === '바이러스') || (a === '바이러스' && b === '세균');
+    if (!ok) { fail('defn', e.currentTarget, $('#dfMsg'), '선배의 말에서 우리 몸에 들어오는 두 가지를 찾아 다시 써 봅시다.'); return; }
+    S.defnOk = true; if (S.max < 2) S.max = 2; push(); go(2);
+  });
+}
+async function claim(n, btn) {
+  const m = $('#claimMsg');
+  if (!API_URL) { S.n = n; S.max = Math.max(S.max, 1); save(); render(); setSync('미리보기: 이 기기에만 저장'); return; }
+  btn.disabled = true; m.hidden = true;
+  try {
+    const r = await apiGet({ action: 'claim', device: S.device, want: n });
+    if (r.ok) { S.n = r.n; save(); render(); push(); return; }
+    m.hidden = false;
+    m.textContent = r.reason === 'taken' ? `직원 ${n}번은 다른 기기가 이미 쓰고 있어요. 선생님께 알려 봅시다.` : '출근 기록을 남기지 못했어요. 다시 눌러 봅시다.';
+  } catch (e) { m.hidden = false; m.textContent = '보건소에 연결하지 못했어요. 인터넷을 확인하고 다시 눌러 봅시다.'; }
+  btn.disabled = false;
+}
+
+/* 2. 진료 접수 */
+function symPool(i, P) {
+  if (S.pool[i]) return S.pool[i];
+  const dset = DM[P.d].sym;
+  const others = shuffle(Object.keys(SYM).filter(k => !dset.includes(k))).slice(0, 8 - P.sy.length);
+  S.pool[i] = shuffle(P.sy.concat(others)); save();
+  return S.pool[i];
+}
+function viewClinic() {
+  const v = $('#view');
+  const list = myPatients();
+  const i = Math.min(S.pi, list.length - 1);
+  const P = list[i], st = patOf(i);
+  const asked = st.order;
+  const allAsked = asked.length === 3;
+  const dots = list.map((_, k) => `<i class="${S.pat[k] && S.pat[k].ok ? 'ok' : (k === i ? 'now' : '')}"></i>`).join('');
+  const chat = asked.map(q => `<p class="q">${Q[q]}</p><p class="a" id="ans${q}">${esc(P.a[q])}</p>`).join('');
+  const asks = [0, 1, 2].filter(q => !asked.includes(q)).map(q => `<button type="button" data-q="${q}">${Q[q]}</button>`).join('');
+  const slip = (P.test && allAsked) ? `<div class="testslip pop"><svg width="26" height="30" viewBox="0 0 26 30" aria-hidden="true"><rect x="1" y="1" width="24" height="28" rx="3" fill="#fff" stroke="#4c645d" stroke-width="2"/><path d="M6 9h14M6 15h14M6 21h8" stroke="#4c645d" stroke-width="2"/></svg>
+      <div>주민이 가져온 검사 결과지: ${P.test.t} → <span style="color:var(--alert)">${P.test.r}</span><small>병원에서 받은 검사 결과예요. 진료 기록에 참고해 봅시다.</small></div></div>` : '';
+  const pool = symPool(i, P);
+  const dName = st.d ? DM[st.d].name : '';
+  v.innerHTML = `<div class="panel">
+    <div class="row" style="justify-content:space-between">
+      <h2>진료 접수 · 주민 ${i + 1}</h2>
+      <div class="qdots">${dots}<span>${list.filter((_, k) => S.pat[k] && S.pat[k].ok).length} / ${list.length}명 기록</span></div>
+    </div>
+    <div class="clinic-grid">
+      <div class="patient">${avatar(P.look, P.d)}<strong>${P.who}</strong><span>${P.note}</span></div>
+      <div class="chat">
+        ${asked.length ? chat : `<p class="lead">주민이 보건소에 들어왔어요. 아래 질문을 하나씩 눌러 주민의 이야기를 들어 봅시다.</p>`}
+        ${asks ? `<div class="asks">${asks}</div>` : ''}
+        ${slip}
+      </div>
+    </div>
+    ${allAsked ? (st.ok ? doneBox(i, P) : `
+    <div class="chart pop" id="chart">
+      <div class="head"><span>진료 기록지</span><small>점곡 보건소 · 직원 ${S.n} · 주민 ${i + 1}</small></div>
+      <div class="line"><b>① 다녀온 곳</b><div>
+        <input class="inp" id="cPlace" autocomplete="off" placeholder="주민이 다녀온 곳을 써 봅시다" value="${esc(st.place)}">
+      </div></div>
+      <div class="line"><b>② 증상</b><div>
+        <p class="field hint" style="margin:0">주민이 말한 증상만 모두 골라 봅시다.</p>
+        <div class="chips" id="cSym">${pool.map(k => `<button type="button" class="chip ${st.sy.includes(k) ? 'on' : ''}" data-k="${k}">${SYM[k]}</button>`).join('')}</div>
+      </div></div>
+      <div class="line"><b>③ 감염병</b><div>
+        <p id="cDis">${st.d ? `<span class="picked" data-d="${st.d}">${dName}</span>` : '<span class="hint">아래 「감염병 증상 안내판」에서 주민의 증상과 이어지는 카드를 눌러 봅시다.</span>'}</p>
+      </div></div>
+    </div>
+    <div class="field"><h3>감염병 증상 안내판</h3><p class="hint">보건소 벽에 붙어 있는 안내판이에요. 주민이 말한 증상이 들어 있는 카드를 찾아봅시다.</p></div>
+    <div class="board" id="board">${DIS.map(d => `<button type="button" class="dcard ${st.d === d.id ? 'on' : ''}" data-d="${d.id}"><h4>${d.name}</h4><ul>${d.sym.map(k => `<li data-k="${k}">${SYM[k]}</li>`).join('')}</ul></button>`).join('')}</div>
+    <p id="cMsg" hidden></p>
+    <div class="row"><button class="btn" id="cBtn" type="button">진료 기록 확인</button></div>`) : ''}
+  </div>`;
+
+  v.querySelectorAll('.asks button').forEach(b => b.addEventListener('click', () => {
+    st.order.push(Number(b.dataset.q)); save(); viewClinicKeep();
+  }));
+  if (!allAsked || st.ok) {
+    const nx = $('#nextPat'); if (nx) nx.addEventListener('click', nextPatient);
+    return;
+  }
+  $('#cPlace').addEventListener('input', e => { st.place = e.target.value; save(); });
+  $('#cSym').querySelectorAll('.chip').forEach(b => b.addEventListener('click', () => {
+    const k = b.dataset.k, at = st.sy.indexOf(k);
+    if (at >= 0) st.sy.splice(at, 1); else st.sy.push(k);
+    b.classList.toggle('on', at < 0); save();
+  }));
+  $('#board').querySelectorAll('.dcard').forEach(b => b.addEventListener('click', () => {
+    st.d = b.dataset.d; save();
+    $('#board').querySelectorAll('.dcard').forEach(x => x.classList.toggle('on', x === b));
+    $('#cDis').innerHTML = `<span class="picked" data-d="${st.d}">${DM[st.d].name}</span>`;
+  }));
+  $('#cBtn').addEventListener('click', e => checkChart(e.currentTarget, i, P, st));
+}
+function viewClinicKeep() { const y = window.scrollY; viewClinic(); window.scrollTo(0, y); }
+function checkChart(btn, i, P, st) {
+  const m = $('#cMsg');
+  $('#view').querySelectorAll('.a.mark').forEach(x => x.classList.remove('mark'));
+  const place = norm(st.place);
+  if (!place || !P.keys.some(k => place.includes(k))) {
+    const c = fail('place' + S.n + i, btn, m, '① 다녀온 곳을 다시 봅시다. 주민이 「어디에 다녀왔나요?」에 한 대답에서 장소 이름을 찾아 써 봅시다.');
+    if (c >= 2) { const a = $('#ans0'); if (a) a.classList.add('mark'); }
+    return;
+  }
+  const want = P.sy.slice().sort().join(), got = st.sy.slice().sort().join();
+  if (want !== got) {
+    const extra = st.sy.filter(k => !P.sy.includes(k)).length, miss = P.sy.filter(k => !st.sy.includes(k)).length;
+    const why = extra && miss ? '주민이 말하지 않은 증상이 들어 있고, 말한 증상 가운데 빠진 것도 있어요.' : (extra ? '주민이 말하지 않은 증상이 들어 있어요.' : '주민이 말한 증상 가운데 빠진 것이 있어요.');
+    const c = fail('sym' + S.n + i, btn, m, '② 증상을 다시 봅시다. ' + why);
+    if (c >= 2) { const a = $('#ans1'); if (a) a.classList.add('mark'); }
+    return;
+  }
+  if (st.d !== P.d) {
+    let t = st.d ? '③ 고른 카드에 주민의 증상이 모두 들어 있는지 견주어 봅시다.' : '③ 안내판에서 카드를 하나 골라 봅시다.';
+    if (st.d && P.test) t += ' 주민이 가져온 검사 결과지도 다시 읽어 봅시다.';
+    const c = fail('dis' + S.n + i, btn, m, t);
+    if (c >= 2) $('#board').querySelectorAll('li').forEach(li => li.classList.toggle('hit', P.sy.includes(li.dataset.k)));
+    return;
+  }
+  st.ok = true; save(); push();
+  viewClinicKeep();
+}
+function doneBox(i, P) {
+  const last = i === myPatients().length - 1;
+  return `<div class="msg ok pop">진료 기록을 마쳤어요. 마을 상황판에 핀을 꽂았어요.</div>
+    <div class="linked" data-d="${P.d}"><span>${PLACES[P.p].t}</span>${ARROW}<span>${P.sy.map(k => SYM[k]).join(', ')}</span>${ARROW}<span class="d">${DM[P.d].name}</span></div>
+    <div class="row"><button class="btn" id="nextPat" type="button">${last ? '마을 상황판 보러 가기' : '다음 주민 맞이하기'}</button></div>`;
+}
+function nextPatient() {
+  const list = myPatients();
+  const k = list.findIndex((_, j) => !(S.pat[j] && S.pat[j].ok));
+  if (k < 0) { if (S.max < 3) S.max = 3; push(); go(3); return; }
+  S.pi = k; save(); render(); window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+}
+
+/* 3. 마을 상황판 */
+function viewBoard() {
+  const v = $('#view');
+  const done = myPatients().every((_, j) => S.pat[j] && S.pat[j].ok);
+  if (!done) { S.view = 2; render(); return; }
+  const cases = allCases();
+  const other = slots.find(sl => sl.n !== S.n && sl.data && (sl.data.cases || []).length);
+  v.innerHTML = `<div class="panel">
+    <h2>마을 상황판</h2>
+    <p class="lead">우리 반 직원들이 기록한 환자가 다녀온 곳이에요. ${API_URL ? (other ? '친구의 기록도 함께 보여요.' : '친구가 기록을 보내면 이곳에 함께 나타나요.') : '미리보기에서는 내 기록만 보여요.'}</p>
+    ${statsHTML(cases)}
+    <div class="mapbox" id="map">${mapSVG(cases)}</div>
+    ${legend()}
+    ${S.sent1 ? sentBox() : `
+    <div class="field"><label for="learn">상황판을 살펴보고 알게 된 점을 써 봅시다.</label>
+      <p class="hint">환자가 다녀온 곳은 어떤 곳인가요? 사람이 얼마나 있었는지 주민들의 이야기를 떠올려 봅시다.</p>
+      <textarea class="inp" id="learn">${esc(S.learn)}</textarea><p class="count" id="learnC"></p></div>
+    <div class="field"><label>교과서 문장의 빈칸을 채워 봅시다.</label>
+      <p class="blank-sent">사람이 많이 모이는 장소에서 독감, 수두, 결막염, 볼거리, 코로나19 등과 같은
+      <input class="inp" id="b1" autocomplete="off" value="${esc(S.blank1)}" aria-label="빈칸">에 걸릴 수도 있습니다.</p></div>
+    <div class="field"><label for="exp">감염병에 걸렸거나 예방접종을 했던 내 경험을 써 봅시다.</label>
+      <p class="hint">언제, 어떤 감염병이었는지 써 봅시다. 친구 이름은 쓰지 않아요.</p>
+      <div class="row"><button type="button" class="chip ${S.noExp ? 'on' : ''}" id="noExp">걸린 적이 없어요</button></div>
+      <textarea class="inp" id="exp" placeholder="${S.noExp ? '가족이나 이웃에게 들은 감염병 이야기를 써 봅시다.' : '예: 작년 겨울에 독감 예방접종을 했습니다.'}">${esc(S.exp)}</textarea><p class="count" id="expC"></p></div>
+    <p id="s1Msg" hidden></p>
+    <div class="row"><button class="btn" id="s1Btn" type="button">1부 보고서 보내기</button></div>`}
+  </div>`;
+  if (S.sent1) { bindWait(); return; }
+  countBind($('#learn'), $('#learnC'), 15, t => { S.learn = t; save(); });
+  countBind($('#exp'), $('#expC'), 10, t => { S.exp = t; save(); });
+  $('#b1').addEventListener('input', e => { S.blank1 = e.target.value; save(); });
+  $('#noExp').addEventListener('click', e => {
+    S.noExp = !S.noExp; save(); e.currentTarget.classList.toggle('on', S.noExp);
+    $('#exp').placeholder = S.noExp ? '가족이나 이웃에게 들은 감염병 이야기를 써 봅시다.' : '예: 작년 겨울에 독감 예방접종을 했습니다.';
+  });
+  $('#s1Btn').addEventListener('click', e => {
+    const m = $('#s1Msg'), b = e.currentTarget;
+    if (norm(S.learn).length < 15) return fail('learn', b, m, '알게 된 점을 15자 넘게 써 봅시다.');
+    if (norm(S.blank1) !== '감염병') return fail('blank1', b, m, '빈칸에 들어갈 말은 이 단원에서 배우는 낱말이에요. 선배의 첫 안내를 떠올려 봅시다.');
+    if (norm(S.exp).length < 10) return fail('exp', b, m, '내 경험을 10자 넘게 써 봅시다.');
+    S.sent1 = true; save(); push(); render();
+  });
+}
+function sentBox() {
+  return `<div class="wait pop" id="wait">
+    <h3>1부 근무를 마쳤어요</h3>
+    <p>${part2 ? '선생님이 2부를 열었어요. 마을에 감염병이 퍼지고 있어요!' : '선생님이 2부 「유행 경보」를 열어 주면 다음 일을 시작할 수 있어요. 기다리는 동안 상황판을 살펴봅시다.'}</p>
+    <button class="btn cue" id="toP2" type="button" ${part2 ? '' : 'disabled'}>2부 시작하기</button>
+  </div>`;
+}
+function bindWait() {
+  const b = $('#toP2'); if (b) b.addEventListener('click', () => { if (part2) { if (S.max < 4) S.max = 4; go(4); } });
+}
+
+/* 4. 주민 안내문 */
+function noticeKw(d, line) { return DM[d].kw.some(k => line.includes(k)); }
+function posterHTML(N, who) {
+  const d = N.d && DM[N.d];
+  if (!d) return `<div class="poster"><div class="ph"><small>점곡 보건소 알림</small><h3 class="empty">감염병을 골라 봅시다</h3></div><div class="pb"><p class="empty">맡은 감염병을 고르면 안내문이 만들어져요.</p></div></div>`;
+  const sy = (N.sy || []).filter(s => String(s).trim());
+  return `<div class="poster" data-d="${d.id}"><div class="ph"><small>점곡 보건소 알림${who ? ' · 직원 ' + who : ''}</small><h3>${d.name}을 알아 둡시다</h3></div>
+    <div class="pb"><h4>몸에서 나타나는 증상</h4>${sy.length ? `<ul>${sy.map(s => `<li>${esc(s)}</li>`).join('')}</ul>` : '<p class="empty">조사한 증상을 써 봅시다.</p>'}
+    <h4>감염병의 특징</h4>${N.feat ? `<p>${esc(N.feat)}</p>` : '<p class="empty">조사한 특징을 써 봅시다.</p>'}
+    <p class="src">출처: ${N.src ? esc(N.src) : '<span class="empty">찾은 곳을 써 봅시다</span>'}</p></div></div>`;
+}
+function otherNoticeDis() {
+  const o = slots.find(sl => sl.n !== S.n && sl.data && sl.data.notice && sl.data.notice.d);
+  return o ? o.data.notice.d : '';
+}
+function viewNotice() {
+  if (!(part2 && S.sent1)) { S.view = 3; render(); return; }
+  const v = $('#view'), N = S.notice;
+  if (!N.start) { N.start = Date.now(); save(); }
+  const taken = otherNoticeDis();
+  v.innerHTML = `<div class="panel">
+    <h2>주민 안내문 만들기</h2>
+    <div class="say"><span class="who">${NURSE}</span><div class="bub"><p>마을 상황판에 환자가 계속 늘고 있어요. 감염병 하나를 맡아 <b>몸에서 나타나는 증상</b>과 <b>감염병의 특징</b>을 조사하고, 주민에게 알릴 안내문을 만들어 봅시다.</p></div></div>
+    <div class="field"><label>맡을 감염병을 골라 봅시다.</label><p class="hint">친구와 다른 감염병을 골라요.</p></div>
+    <div class="board" id="nPick">${DIS.map(d => `<button type="button" class="dcard ${N.d === d.id ? 'on' : ''}" data-d="${d.id}" ${taken === d.id && N.d !== d.id ? 'disabled' : ''}><h4>${d.name}</h4>${taken === d.id ? '<span class="taken">친구가 맡았어요</span>' : ''}</button>`).join('')}</div>
+    ${N.d ? `
+    <div class="refbox">
+      <p><b>찾아보는 곳:</b> 국가건강정보포털 <a class="extlink" href="https://health.kdca.go.kr" target="_blank" rel="noopener">health.kdca.go.kr</a></p>
+      <p>검색 창에 「${DM[N.d].name} 증상」을 넣어 찾아봅시다. 인터넷에서 찾은 내용은 꼭 출처를 밝혀요.</p>
+      <p id="refHint" class="hint"></p>
+      <div id="refBody" hidden></div>
+    </div>
+    <div class="split">
+      <div class="panel" style="padding:0;border:none;gap:14px">
+        <div class="field"><label>몸에서 나타나는 증상 (두 가지 넘게)</label>
+          ${[0, 1, 2].map(k => `<input class="inp" id="ns${k}" autocomplete="off" placeholder="증상 ${k + 1}${k === 2 ? ' (있으면 써요)' : ''}" value="${esc(N.sy[k])}">`).join('')}</div>
+        <div class="field"><label for="nf">감염병의 특징</label><p class="hint">다른 사람에게 옮기는지, 언제 자주 유행하는지 찾아봅시다.</p>
+          <textarea class="inp" id="nf">${esc(N.feat)}</textarea><p class="count" id="nfC"></p></div>
+        <div class="field"><label for="nsrc">출처</label><input class="inp" id="nsrc" autocomplete="off" placeholder="예: 국가건강정보포털" value="${esc(N.src)}"></div>
+      </div>
+      <div id="poster">${posterHTML(N, S.n)}</div>
+    </div>
+    <p id="nMsg" hidden></p>
+    <div class="row"><button class="btn" id="nBtn" type="button">${N.ok ? '안내문 다시 보내기' : '안내문 붙이기'}</button>${N.ok ? '<button class="btn ghost" id="nNext" type="button">퍼짐 실험실로 가기</button>' : ''}</div>` : ''}
+  </div>`;
+  v.querySelectorAll('#nPick .dcard').forEach(b => b.addEventListener('click', () => {
+    if (N.d !== b.dataset.d) { N.d = b.dataset.d; N.ok = false; save(); push(); }
+    const y = window.scrollY; viewNotice(); window.scrollTo(0, y);
+  }));
+  if (!N.d) return;
+  const upd = () => { $('#poster').innerHTML = posterHTML(N, S.n); save(); };
+  [0, 1, 2].forEach(k => $('#ns' + k).addEventListener('input', e => { N.sy[k] = e.target.value; upd(); }));
+  countBind($('#nf'), $('#nfC'), 8, t => { N.feat = t; upd(); });
+  $('#nsrc').addEventListener('input', e => { N.src = e.target.value; upd(); });
+  refTimer();
+  $('#nBtn').addEventListener('click', e => {
+    const m = $('#nMsg'), b = e.currentTarget;
+    const lines = N.sy.map(s => s.trim()).filter(s => norm(s).length >= 3);
+    if (lines.length < 2) return fail('nsy', b, m, '증상을 두 가지 넘게 써 봅시다. 한 칸에 하나씩 써요.');
+    if (lines.filter(s => noticeKw(N.d, s)).length < 2) return fail('nsy2', b, m, `${DM[N.d].name}에 걸렸을 때 몸 어디가 어떻게 되는지 조사한 내용으로 다시 써 봅시다.`);
+    if (norm(N.feat).length < 8) return fail('nft', b, m, '감염병의 특징을 8자 넘게 써 봅시다.');
+    if (norm(N.src).length < 4) return fail('nsrc', b, m, '내용을 찾은 곳(출처)을 써 봅시다.');
+    N.ok = true; if (S.max < 5) S.max = 5; save(); push();
+    const y = window.scrollY; viewNotice(); window.scrollTo(0, y);
+    okMsg($('#nMsg'), '보건소 게시판에 안내문을 붙였어요. 이제 감염병이 어떻게 퍼지는지 실험해 봅시다.');
+  });
+  const nx = $('#nNext'); if (nx) nx.addEventListener('click', () => go(5));
+}
+let refT = null;
+function refTimer() {
+  clearTimeout(refT);
+  const N = S.notice, wait = 120000 - (Date.now() - N.start);
+  const h = $('#refHint'), body = $('#refBody');
+  if (!h) return;
+  if (wait > 0) {
+    h.textContent = '검색이 어려우면 ' + Math.ceil(wait / 60000) + '분 뒤에 보건소 자료함이 열려요.';
+    refT = setTimeout(refTimer, Math.min(wait, 15000));
+    return;
+  }
+  h.innerHTML = '<button type="button" class="btn ghost" id="refOpen" style="min-height:40px;padding:6px 14px">보건소 자료함 열기</button>';
+  $('#refOpen').addEventListener('click', () => {
+    const d = DM[N.d];
+    body.hidden = false; h.innerHTML = '';
+    body.innerHTML = `<p><b>보건소 자료함 · ${d.name}</b> (출처를 쓸 때는 「보건소 자료함」이라고 써요)</p>
+      <p>증상: ${d.ref.sy.join(' ')}</p><p>특징: ${d.ref.ft.join(' ')}</p>`;
+  });
+}
+
+/* 5. 퍼짐 실험실 */
+let sim = null;
+function viewLab() {
+  if (!(part2 && S.sent1)) { S.view = 3; render(); return; }
+  const v = $('#view'), M = S.sim;
+  const last = id => { const r = M.runs.filter(x => x.id === id); return r.length ? r[r.length - 1] : null; };
+  const pk = last('park'), cn = last('cinema');
+  v.innerHTML = `<div class="panel">
+    <h2>퍼짐 실험실</h2>
+    <div class="say"><span class="who">${NURSE}</span><div class="bub"><p>감염병에 걸린 사람 <b>한 명</b>이 여러 장소에 들어가면 어떻게 될까요? 장소를 고르고 실험을 시작해 봅시다. <b>한산한 공원</b>과 <b>꽉 찬 영화관</b>은 꼭 해 봐요.</p></div></div>
+    <div class="presets" id="presets">${PRESETS.map(p => `<button type="button" class="preset" data-id="${p.id}"><strong>${p.t}</strong><span>${p.s} · 아픈 사람 1명</span>${last(p.id) ? `<em>실험함 · 아픈 사람 ${last(p.id).sick}명</em>` : ''}</button>`).join('')}</div>
+    <div class="lab">
+      <div class="meter" style="gap:8px">
+        <div class="cvwrap"><canvas id="cv" width="1200" height="680" aria-label="퍼짐 실험 화면"></canvas><span class="tag" id="cvTag">장소를 골라 봅시다</span></div>
+        <div class="timebar"><i id="tbar"></i></div>
+        <div class="row"><button class="btn" id="runBtn" type="button" disabled>실험 시작</button><span class="hint" id="runHint">초록 점은 건강한 사람, 빨간 점은 아픈 사람이에요. 15초 동안 움직여요.</span></div>
+      </div>
+      <div class="meter">
+        <div class="big"><div><b id="mHealthy">-</b><span>건강한 사람</span></div><div class="sick"><b id="mSick">-</b><span>아픈 사람</span></div></div>
+        <ul class="events" id="events">${EVENTS.map(e => `<li data-at="${e.at}"><i>${e.at}명</i>${e.t}</li>`).join('')}</ul>
+      </div>
+    </div>
+    ${pk && cn ? `
+    <div class="field"><h3>실험 기록</h3><p class="hint">실험이 끝났을 때 아픈 사람이 몇 명이었는지 직접 써 봅시다. 마지막에 한 실험을 써요.</p></div>
+    <div class="tbl-scroll"><table class="runs"><thead><tr><th>장소</th><th>처음 사람 수</th><th>처음 아픈 사람</th><th>끝났을 때 아픈 사람</th></tr></thead><tbody>
+      <tr><td>한산한 공원</td><td>8명</td><td>1명</td><td><input class="inp" id="rPark" inputmode="numeric" style="width:6em" value="${esc(M.park)}"> 명</td></tr>
+      <tr><td>꽉 찬 영화관</td><td>40명</td><td>1명</td><td><input class="inp" id="rCin" inputmode="numeric" style="width:6em" value="${esc(M.cinema)}"> 명</td></tr>
+    </tbody></table></div>
+    <div class="field"><label>실험 결과를 보고 알맞은 것을 골라 봅시다.</label>
+      <div class="radios" id="trend">${[['more', '사람이 많은 곳에서 감염병이 더 많이 퍼졌다.'], ['same', '사람 수와 상관없이 비슷하게 퍼졌다.'], ['less', '사람이 적은 곳에서 감염병이 더 많이 퍼졌다.']].map(([k, t]) => `<button type="button" data-k="${k}" class="${M.trend === k ? 'on' : ''}">${t}</button>`).join('')}</div></div>
+    <div class="field"><label for="why">왜 그렇게 되었을지 내 생각을 써 봅시다.</label><textarea class="inp" id="why" placeholder="사람들이 가까이 있으면…">${esc(M.why)}</textarea><p class="count" id="whyC"></p></div>
+    <p id="lMsg" hidden></p>
+    <div class="row"><button class="btn" id="lBtn" type="button">${M.ok ? '실험 기록 다시 보내기' : '실험 기록 보내기'}</button>${M.ok ? '<button class="btn ghost" id="lNext" type="button">보건소 회의 가기</button>' : ''}</div>` : `<p class="msg info">${pk || cn ? (pk ? '꽉 찬 영화관' : '한산한 공원') + '도 실험해 봅시다.' : '한산한 공원과 꽉 찬 영화관을 모두 실험하면 기록지가 나와요.'}</p>`}
+  </div>`;
+  let chosen = null;
+  drawIdle();
+  v.querySelectorAll('.preset').forEach(b => b.addEventListener('click', () => {
+    if (sim && sim.running) return;
+    chosen = PRESETS.find(p => p.id === b.dataset.id);
+    v.querySelectorAll('.preset').forEach(x => x.classList.toggle('on', x === b));
+    $('#runBtn').disabled = false; $('#cvTag').textContent = chosen.t + ' · ' + chosen.s;
+    setupSim(chosen); drawSim();
+  }));
+  $('#runBtn').addEventListener('click', () => { if (chosen && !(sim && sim.running)) startSim(chosen); });
+  if (!(pk && cn)) return;
+  $('#rPark').addEventListener('input', e => { M.park = e.target.value; save(); });
+  $('#rCin').addEventListener('input', e => { M.cinema = e.target.value; save(); });
+  v.querySelectorAll('#trend button').forEach(b => b.addEventListener('click', () => {
+    M.trend = b.dataset.k; save(); v.querySelectorAll('#trend button').forEach(x => x.classList.toggle('on', x === b));
+  }));
+  countBind($('#why'), $('#whyC'), 10, t => { M.why = t; save(); });
+  $('#lBtn').addEventListener('click', e => {
+    const m = $('#lMsg'), b = e.currentTarget;
+    if (Number(norm(M.park)) !== pk.sick || norm(M.park) === '') return fail('rpark', b, m, `한산한 공원 실험이 끝났을 때 아픈 사람 수를 다시 봅시다. 위 장소 카드에 적혀 있어요.`);
+    if (Number(norm(M.cinema)) !== cn.sick || norm(M.cinema) === '') return fail('rcin', b, m, `꽉 찬 영화관 실험이 끝났을 때 아픈 사람 수를 다시 봅시다. 위 장소 카드에 적혀 있어요.`);
+    const want = cn.sick > pk.sick ? 'more' : (cn.sick === pk.sick ? 'same' : 'less');
+    if (M.trend !== want) return fail('trend', b, m, '내가 쓴 두 숫자를 견주어 보고 다시 골라 봅시다.');
+    if (norm(M.why).length < 10) return fail('why', b, m, '내 생각을 10자 넘게 써 봅시다.');
+    M.ok = true; if (S.max < 6) S.max = 6; save(); push();
+    const y = window.scrollY; viewLab(); window.scrollTo(0, y);
+    okMsg($('#lMsg'), '실험 기록을 보냈어요. 이제 보건소 회의에서 감염병의 위험성을 이야기해 봅시다.');
+  });
+  const nx = $('#lNext'); if (nx) nx.addEventListener('click', () => go(6));
+}
+const CW = 1200, CH = 680, RAD = 11, TOUCH = 40, DUR = 15;
+function setupSim(p) {
+  if (sim && sim.raf) cancelAnimationFrame(sim.raf);
+  const dots = [];
+  for (let i = 0; i < p.n; i++) {
+    const a = Math.random() * Math.PI * 2, sp = 95 + Math.random() * 55;
+    dots.push({ x: i === 0 ? CW / 2 : 30 + Math.random() * (CW - 60), y: i === 0 ? CH / 2 : 30 + Math.random() * (CH - 60), vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, sick: i === 0, at: i === 0 ? -1 : 0 });
+  }
+  sim = { p, dots, t: 0, running: false, raf: 0 };
+  meter();
+}
+function meter() {
+  const s = sim.dots.filter(d => d.sick).length;
+  $('#mSick').textContent = s; $('#mHealthy').textContent = sim.dots.length - s;
+  $('#events').querySelectorAll('li').forEach(li => li.classList.toggle('on', s >= Number(li.dataset.at)));
+  $('#tbar').style.width = Math.min(100, sim.t / DUR * 100) + '%';
+}
+function drawIdle() {
+  const c = $('#cv').getContext('2d');
+  c.fillStyle = '#f6faf8'; c.fillRect(0, 0, CW, CH);
+  c.fillStyle = '#9aaba5'; c.font = '700 40px "Nanum Gothic", sans-serif'; c.textAlign = 'center';
+  c.fillText('위에서 장소를 골라 봅시다', CW / 2, CH / 2);
+}
+function drawSim() {
+  const c = $('#cv').getContext('2d');
+  c.fillStyle = '#f6faf8'; c.fillRect(0, 0, CW, CH);
+  c.strokeStyle = '#e3ece8'; c.lineWidth = 2;
+  for (let x = 100; x < CW; x += 100) { c.beginPath(); c.moveTo(x, 0); c.lineTo(x, CH); c.stroke(); }
+  for (let y = 100; y < CH; y += 100) { c.beginPath(); c.moveTo(0, y); c.lineTo(CW, y); c.stroke(); }
+  sim.dots.forEach(d => {
+    if (d.sick) { c.fillStyle = 'rgba(207,75,37,0.13)'; c.beginPath(); c.arc(d.x, d.y, TOUCH, 0, Math.PI * 2); c.fill(); }
+  });
+  sim.dots.forEach(d => {
+    c.beginPath(); c.arc(d.x, d.y, RAD, 0, Math.PI * 2);
+    c.fillStyle = d.sick ? '#cf4b25' : '#3f9a78'; c.fill();
+    c.lineWidth = 3; c.strokeStyle = '#ffffff'; c.stroke();
+  });
+}
+function startSim(p) {
+  setupSim(p); sim.running = true;
+  $('#runBtn').disabled = true; $('#runHint').textContent = '실험하는 중이에요. 빨간 점이 어떻게 늘어나는지 지켜봅시다.';
+  document.querySelectorAll('.preset').forEach(b => b.disabled = true);
+  let prev = performance.now();
+  const step = now => {
+    const dt = Math.min(0.05, (now - prev) / 1000); prev = now;
+    sim.t += dt;
+    const D = sim.dots;
+    D.forEach(d => {
+      d.x += d.vx * dt; d.y += d.vy * dt;
+      if (d.x < RAD) { d.x = RAD; d.vx = Math.abs(d.vx); } if (d.x > CW - RAD) { d.x = CW - RAD; d.vx = -Math.abs(d.vx); }
+      if (d.y < RAD) { d.y = RAD; d.vy = Math.abs(d.vy); } if (d.y > CH - RAD) { d.y = CH - RAD; d.vy = -Math.abs(d.vy); }
+      if (Math.random() < dt * 0.6) { const a = Math.atan2(d.vy, d.vx) + (Math.random() - 0.5) * 1.4, sp = Math.hypot(d.vx, d.vy); d.vx = Math.cos(a) * sp; d.vy = Math.sin(a) * sp; }
+    });
+    const pInf = 1 - Math.exp(-4 * dt);
+    D.forEach(s => {
+      if (!s.sick || sim.t - s.at < 0.3) return;
+      D.forEach(o => {
+        if (o.sick) return;
+        if (Math.hypot(o.x - s.x, o.y - s.y) < TOUCH && Math.random() < pInf) { o.sick = true; o.at = sim.t; }
+      });
+    });
+    drawSim(); meter();
+    if (sim.t < DUR) { sim.raf = requestAnimationFrame(step); return; }
+    sim.running = false;
+    const sick = D.filter(d => d.sick).length;
+    S.sim.runs.push({ id: p.id, n: p.n, sick }); save(); push();
+    const y = window.scrollY; viewLab(); window.scrollTo(0, y);
+    setupSim(p); sim.dots = D; sim.t = DUR; drawSim(); meter();
+    $('#cvTag').textContent = p.t + ' · 끝: 아픈 사람 ' + sick + '명';
+    document.querySelectorAll('.preset').forEach(b => b.classList.toggle('on', b.dataset.id === p.id));
+    $('#runHint').textContent = `실험 끝! ${p.t}에서 아픈 사람이 1명에서 ${sick}명이 되었어요. 다시 하려면 장소를 눌러요.`;
+  };
+  sim.raf = requestAnimationFrame(step);
+}
+
+/* 6. 보건소 회의 */
+function meetBoardHTML(includeMine) {
+  const notes = [];
+  if (includeMine && S.meet.ok) S.meet.ops.forEach(o => notes.push({ cat: o.cat, text: o.text, who: S.n }));
+  slots.forEach(sl => { if (sl.n !== S.n && sl.data && sl.data.meet) (sl.data.meet.ops || []).forEach(o => notes.push({ cat: o.cat, text: o.text, who: sl.n })); });
+  return `<div class="meetboard">${CATS.map(c => `<section><h4>${c.t}</h4>${notes.filter(n => n.cat === c.id).map(n => `<p class="note"><small>직원 ${n.who}</small>${esc(n.text)}</p>`).join('') || '<p class="hint">아직 없어요</p>'}</section>`).join('')}</div>`;
+}
+function viewMeet() {
+  if (!(part2 && S.sent1)) { S.view = 3; render(); return; }
+  const v = $('#view'), M = S.meet;
+  v.innerHTML = `<div class="panel">
+    <h2>보건소 회의</h2>
+    <div class="say"><span class="who">${NURSE}</span><div class="bub"><p>안내문과 퍼짐 실험 결과를 떠올려 봅시다. <b>감염병은 어떤 위험성이 있을까요?</b> 의견을 두 가지 내 봅시다. 두 의견은 서로 다른 칸에 넣어요.</p></div></div>
+    ${M.ok ? '' : M.ops.map((o, k) => `
+    <div class="opin"><h4>의견 ${k + 1}</h4>
+      <div class="cats" data-k="${k}">${CATS.map(c => `<button type="button" class="cat ${o.cat === c.id ? 'on' : ''}" data-c="${c.id}">${c.t}</button>`).join('')}</div>
+      <textarea class="inp" id="op${k}" placeholder="감염병에 걸리면…">${esc(o.text)}</textarea><p class="count" id="op${k}C"></p>
+    </div>`).join('') + `
+    <div class="field"><label>회의 내용을 정리하며 빈칸을 채워 봅시다.</label>
+      <p class="blank-sent">감염병에 걸리면 몸이 아프기도 하지만 다른 사람에게 병을 <input class="inp" id="mb" autocomplete="off" value="${esc(M.blank)}" aria-label="빈칸"> 수 있어 위험합니다.</p></div>
+    <div class="field"><label for="life">많은 사람이 이용하는 장소에서 감염병 때문에 생길 수 있는 위험성을 써 봅시다.</label>
+      <p class="hint">퍼짐 실험실의 꽉 찬 영화관을 떠올려 봅시다.</p>
+      <textarea class="inp" id="life">${esc(M.life)}</textarea><p class="count" id="lifeC"></p></div>
+    <p id="mMsg" hidden></p>
+    <div class="row"><button class="btn" id="mBtn" type="button">회의에 의견 내기</button></div>`}
+    ${M.ok ? `<p class="msg ok">회의에 의견을 냈어요. ${API_URL ? '친구의 의견도 함께 살펴봅시다.' : ''}</p>${meetBoardHTML(true)}
+      <div class="row"><button class="btn" id="mEnd" type="button">근무 마치기</button></div>` : ''}
+  </div>`;
+  if (M.ok) { $('#mEnd').addEventListener('click', () => { go(7); push(); }); return; }
+  M.ops.forEach((o, k) => {
+    v.querySelectorAll(`.cats[data-k="${k}"] .cat`).forEach(b => b.addEventListener('click', () => {
+      o.cat = b.dataset.c; save();
+      v.querySelectorAll(`.cats[data-k="${k}"] .cat`).forEach(x => x.classList.toggle('on', x === b));
+    }));
+    countBind($('#op' + k), $('#op' + k + 'C'), 12, t => { o.text = t; save(); });
+  });
+  $('#mb').addEventListener('input', e => { M.blank = e.target.value; save(); });
+  countBind($('#life'), $('#lifeC'), 15, t => { M.life = t; save(); });
+  $('#mBtn').addEventListener('click', e => {
+    const m = $('#mMsg'), b = e.currentTarget, [a, c] = M.ops;
+    if (!a.cat || !c.cat) return fail('mcat', b, m, '두 의견 모두 어느 칸에 넣을지 골라 봅시다.');
+    if (a.cat === c.cat) return fail('mcat2', b, m, '두 의견을 서로 다른 칸에 넣어 봅시다. 다른 위험성도 떠올려 봅시다.');
+    if (norm(a.text).length < 12 || norm(c.text).length < 12) return fail('mtxt', b, m, '의견을 하나에 12자 넘게 써 봅시다.');
+    if (!/옮/.test(norm(M.blank))) return fail('mblank', b, m, '감염병은 다른 사람에게 병을 어떻게 할 수 있나요? 「다른 사람에게 옮겨요」 칸을 떠올려 봅시다.');
+    if (norm(M.life).length < 15) return fail('mlife', b, m, '많은 사람이 이용하는 장소의 위험성을 15자 넘게 써 봅시다.');
+    M.ok = true; save(); push();
+    const y = window.scrollY; viewMeet(); window.scrollTo(0, y);
+  });
+}
+
+/* 7. 근무 끝 */
+function viewEnd() {
+  const v = $('#view');
+  const pk = S.sim.runs.filter(r => r.id === 'park').pop(), cn = S.sim.runs.filter(r => r.id === 'cinema').pop();
+  v.innerHTML = `<div class="panel pop endcard">
+    <h2>직원 ${S.n}님, 오늘 근무를 마쳤어요</h2>
+    <div class="say"><span class="who">${NURSE}</span><div class="bub"><p>감염병에 걸리면 몸이 아프기도 하지만 다른 사람에게 병을 옮길 수 있어 위험해요. 많은 사람이 이용하는 장소에서는 감염병이 빠르게 옮겨질 수 있어요. 오늘 정말 수고했어요!</p></div></div>
+    <ul>
+      <li><b>진료한 주민</b><span>${myCases().length}명 · ${myCases().map(c => PLACES[c.p].t + '(' + DM[c.d].name + ')').join(', ')}</span></li>
+      <li><b>만든 안내문</b><span>${S.notice.ok ? DM[S.notice.d].name : '-'}</span></li>
+      <li><b>퍼짐 실험</b><span>${pk && cn ? `공원 1명 → ${pk.sick}명, 영화관 1명 → ${cn.sick}명` : '-'}</span></li>
+      <li><b>회의 의견</b><span>${S.meet.ok ? S.meet.ops.map(o => esc(o.text)).join(' / ') : '-'}</span></li>
+    </ul>
+    ${S.notice.ok ? posterHTML(S.notice, S.n) : ''}
+  </div>`;
+}
+
+/* 처음부터 다시 하기 (두 번 눌러야 동작) */
+let armR = 0;
+$('#restart').addEventListener('click', async e => {
+  const b = e.currentTarget;
+  if (Date.now() - armR > 4000) { armR = Date.now(); b.classList.add('arm'); b.textContent = '한 번 더 누르면 모든 기록을 지웁니다'; setTimeout(() => { b.classList.remove('arm'); b.textContent = '처음부터 다시 하기'; }, 4000); return; }
+  if (API_URL && S.n) { try { await apiGet({ action: 'release', device: S.device }); } catch (err) {} }
+  S = fresh(); save(); b.classList.remove('arm'); b.textContent = '처음부터 다시 하기'; render();
+});
+
+/* ───────── 선생님 화면 ───────── */
+const tArm = {};
+function armed(key, btn, label) {
+  if (Date.now() - (tArm[key] || 0) < 4000) { tArm[key] = 0; return true; }
+  tArm[key] = Date.now(); btn.classList.add('arm'); btn.textContent = '한 번 더 누르세요';
+  setTimeout(() => { if (document.body.contains(btn)) { btn.classList.remove('arm'); btn.textContent = label; } }, 4000);
+  return false;
+}
+function teacherSlots() {
+  if (API_URL) return [1, 2].map(n => slots.find(s => s.n === n) || { n, device: '', stage: 0, data: null });
+  return [1, 2].map(n => S.n === n ? { n, device: S.device, stage: S.max, data: card() } : { n, device: '', stage: 0, data: null });
+}
+function stageText(sl) {
+  if (!sl.device) return ['아직 출근 전', true];
+  const d = sl.data;
+  if (!d) return ['출근함', false];
+  const c = (d.cases || []).length;
+  if (d.meet) return ['회의 의견까지 보냄', false];
+  if (d.sim && d.sim.ok) return ['퍼짐 실험 마침, 회의 중', false];
+  if (d.notice && !d.notice.draft) return ['안내문 붙임, 실험 중', false];
+  if (d.sent1) return [part2 ? '1부 끝, 2부 하는 중' : '1부 끝, 2부 기다리는 중', false];
+  if (c >= 6) return ['진료 마침, 상황판 정리 중', false];
+  return [`진료 ${c} / 6명`, false];
+}
+function renderTeacher() {
+  const T = $('#teacher');
+  const ss = teacherSlots();
+  const cases = [];
+  ss.forEach(sl => sl.data && (sl.data.cases || []).forEach(c => cases.push({ p: c.p, d: c.d, who: sl.n })));
+  const pair = fn => `<div class="pair">${ss.map(sl => `<div><h4>직원 ${sl.n}</h4>${fn(sl.data, sl.n) || '<p class="hint">아직 없어요</p>'}</div>`).join('')}</div>`;
+  const notes = [];
+  ss.forEach(sl => sl.data && sl.data.meet && (sl.data.meet.ops || []).forEach(o => notes.push({ cat: o.cat, text: o.text, who: sl.n })));
+  T.innerHTML = `<div class="tpanel">
+    <div class="tbar"><h2>선생님 화면 · 근무 상황</h2>
+      <button type="button" class="switch ${part2 ? 'open' : ''}" id="p2">${part2 ? '2부 열림 (누르면 닫기)' : '2부 「유행 경보」 열기'}</button>
+      <button type="button" class="danger" id="resetAll">전체 비우기</button>
+      <a href="#" id="toStudent" class="btn ghost" style="text-decoration:none;display:inline-grid;place-items:center">학생 화면</a></div>
+    <p class="hint" id="tMsg">${API_URL ? '5초마다 새로 불러옵니다.' : '미리보기: 시트에 연결되지 않아 이 기기의 기록만 보입니다.'}</p>
+    <div class="slots">${ss.map(sl => { const [t, off] = stageText(sl); const st = sl.data ? sl.data.stage || 1 : 0;
+      return `<div class="slot"><div class="sn"><b>${sl.n}</b><strong>직원 ${sl.n}</strong></div><p class="st ${off ? 'off' : ''}">${t}</p>
+        <div class="prog">${STEPS.map((_, k) => `<i class="${st > k + 1 || (st === 6 && sl.data && sl.data.meet) ? 'ok' : ''}"></i>`).join('')}</div>
+        ${sl.device && API_URL ? `<div class="row"><button type="button" class="danger" data-rel="${sl.n}" style="padding:4px 10px;font-size:0.85rem">배정 풀기</button></div>` : ''}</div>`; }).join('')}</div>
+    <section class="tsec"><h3>마을 상황판</h3>${statsHTML(cases)}<div class="mapbox">${mapSVG(cases)}</div>${legend()}</section>
+    <section class="tsec"><h3>1부 정리: 알게 된 점과 내 경험</h3>
+      ${pair(d => d && (d.learn || d.exp) ? `<p class="note"><small>알게 된 점</small>${esc(d.learn) || '-'}</p><p class="note"><small>내 경험</small>${esc(d.exp) || '-'}</p>` : '')}</section>
+    <section class="tsec"><h3>주민 안내문</h3>${pair((d, n) => d && d.notice && !d.notice.draft ? posterHTML(d.notice, n) : (d && d.notice ? `<p class="hint">${DM[d.notice.d].name} 조사 중</p>` : ''))}</section>
+    <section class="tsec"><h3>퍼짐 실험 결과</h3>${pair(d => {
+      if (!d || !d.sim || !(d.sim.runs || []).length) return '';
+      const rows = d.sim.runs.map(r => `<tr><td>${(PRESETS.find(p => p.id === r.id) || {}).t || r.id}</td><td>${r.n}명</td><td>1명 → ${r.sick}명</td></tr>`).join('');
+      return `<div class="tbl-scroll"><table class="runs"><thead><tr><th>장소</th><th>사람 수</th><th>아픈 사람</th></tr></thead><tbody>${rows}</tbody></table></div>${d.sim.why ? `<p class="note"><small>왜 그렇게 되었을까</small>${esc(d.sim.why)}</p>` : ''}`;
+    })}</section>
+    <section class="tsec"><h3>보건소 회의: 감염병의 위험성</h3>
+      <div class="meetboard">${CATS.map(c => `<section><h4>${c.t}</h4>${notes.filter(n => n.cat === c.id).map(n => `<p class="note"><small>직원 ${n.who}</small>${esc(n.text)}</p>`).join('') || '<p class="hint">아직 없어요</p>'}</section>`).join('')}</div>
+      ${pair(d => d && d.meet && d.meet.life ? `<p class="note"><small>많은 사람이 이용하는 장소의 위험성</small>${esc(d.meet.life)}</p>` : '')}</section>
+    <section class="tsec"><h3>함께 생각해 볼 질문</h3><ol class="think">
+      <li>상황판에서 환자가 다녀온 곳은 어떤 곳인가요? 공통점이 있나요?</li>
+      <li>같은 감염병인데 다녀온 곳이 다른 주민이 있어요. 무엇을 알 수 있나요?</li>
+      <li>공원과 영화관 실험에서 아픈 사람 수가 왜 달라졌을까요?</li>
+      <li>감염병은 어떤 위험성이 있나요? 내 몸과 다른 사람으로 나누어 말해 봅시다.</li>
+      <li>많은 사람이 이용하는 장소에서 감염병 때문에 생길 수 있는 위험성은 무엇일까요?</li>
+    </ol></section>
+  </div>`;
+  $('#toStudent').addEventListener('click', e => { e.preventDefault(); try { history.replaceState(null, '', location.pathname + location.search); } catch (err) { location.hash = ''; } route(); });
+  $('#p2').addEventListener('click', async () => {
+    const want = !part2;
+    if (!API_URL) { part2 = want; try { localStorage.setItem(LOCAL_P2, want ? '1' : '0'); } catch (e) {} renderTeacher(); return; }
+    try { const r = await apiGet({ action: 'open', key: TEACHER_KEY, v: want ? 1 : 0 }); if (r.ok) part2 = want; } catch (e) { $('#tMsg').textContent = '연결하지 못했어요. 다시 눌러 보세요.'; }
+    renderTeacher();
+  });
+  $('#resetAll').addEventListener('click', async e => {
+    if (!armed('all', e.currentTarget, '전체 비우기')) return;
+    if (!API_URL) { S = fresh(); save(); part2 = false; try { localStorage.setItem(LOCAL_P2, '0'); } catch (err) {} renderTeacher(); return; }
+    try { await apiGet({ action: 'reset', key: TEACHER_KEY }); } catch (err) {}
+    await pull(); renderTeacher();
+  });
+  T.querySelectorAll('[data-rel]').forEach(b => b.addEventListener('click', async e => {
+    if (!armed('rel' + b.dataset.rel, e.currentTarget, '배정 풀기')) return;
+    try { await apiGet({ action: 'release', key: TEACHER_KEY, n: b.dataset.rel }); } catch (err) {}
+    await pull(); renderTeacher();
+  }));
+}
+
+/* ───────── 시작 ───────── */
+let timer = null;
+async function tickStudent() {
+  if (document.hidden || location.hash === '#teacher') return;
+  if (sim && sim.running) return;
+  const before = part2 + '|' + JSON.stringify(slots.map(s => s.data && [s.data.cases && s.data.cases.length, s.data.notice && s.data.notice.d, !!s.data.meet]));
+  await pull();
+  const after = part2 + '|' + JSON.stringify(slots.map(s => s.data && [s.data.cases && s.data.cases.length, s.data.notice && s.data.notice.d, !!s.data.meet]));
+  if (before === after) return;
+  renderSteps();
+  const active = document.activeElement && /INPUT|TEXTAREA/.test(document.activeElement.tagName);
+  if (S.view === 3 && S.sent1) { const w = $('#wait'); if (w) { w.outerHTML = sentBox(); bindWait(); } const m = $('#map'); if (m) m.innerHTML = mapSVG(allCases()); }
+  else if (S.view === 3 && !active) { const m = $('#map'); if (m) m.innerHTML = mapSVG(allCases()); }
+  else if (S.view === 6 && S.meet.ok) { const y = window.scrollY; viewMeet(); window.scrollTo(0, y); }
+  else if (S.view === 4 && !active) { const y = window.scrollY; viewNotice(); window.scrollTo(0, y); }
+}
+async function route() {
+  clearInterval(timer);
+  if (location.hash === '#teacher') {
+    await pull(); render();
+    timer = setInterval(async () => { if (!document.hidden) { await pull(); renderTeacher(); } }, 5000);
+  } else {
+    render();
+    await pull(); render();
+    timer = setInterval(tickStudent, 6000);
+  }
+}
+window.addEventListener('hashchange', route);
+document.addEventListener('visibilitychange', () => { if (!document.hidden && location.hash !== '#teacher') tickStudent(); });
+setSync(API_URL ? '' : '미리보기: 이 기기에만 저장');
+route();
+</script>
